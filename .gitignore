@@ -1,0 +1,15 @@
+# Godot generated caches, imports, and local editor state.
+.godot/
+.import/
+export.cfg
+export_credentials.cfg
+*.tmp
+*.log
+
+# Local tooling and build outputs.
+__pycache__/
+.venv/
+build/
+dist/
+.DS_Store
+Thumbs.db
