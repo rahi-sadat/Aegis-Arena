@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="GameBalance" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/game_balance.gd" id="1_balance"]
+
+[resource]
+script = ExtResource("1_balance")
+match_duration_seconds = 180.0
+debug_damage_amount = 100.0
