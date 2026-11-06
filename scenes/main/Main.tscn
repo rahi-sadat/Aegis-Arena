@@ -1,0 +1,51 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/core/game_manager.gd" id="2_manager"]
+[ext_resource type="PackedScene" path="res://scenes/arena/Arena.tscn" id="3_arena"]
+[ext_resource type="PackedScene" path="res://scenes/structures/GuardTower.tscn" id="4_guard"]
+[ext_resource type="PackedScene" path="res://scenes/structures/CoreTower.tscn" id="5_core"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="6_hud"]
+[ext_resource type="Resource" path="res://data/balance/game_balance.tres" id="7_balance"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("2_manager")
+balance = ExtResource("7_balance")
+
+[node name="Arena" parent="." instance=ExtResource("3_arena")]
+
+[node name="Structures" type="Node2D" parent="."]
+
+[node name="BlueLeftGuard" parent="Structures" instance=ExtResource("4_guard")]
+position = Vector2(760, 716)
+structure_id = &"blue_left_guard"
+
+[node name="BlueRightGuard" parent="Structures" instance=ExtResource("4_guard")]
+position = Vector2(1160, 716)
+structure_id = &"blue_right_guard"
+lane = 1
+
+[node name="BlueCore" parent="Structures" instance=ExtResource("5_core")]
+position = Vector2(960, 824)
+structure_id = &"blue_core"
+
+[node name="RedLeftGuard" parent="Structures" instance=ExtResource("4_guard")]
+position = Vector2(760, 336)
+team_id = 1
+structure_id = &"red_left_guard"
+
+[node name="RedRightGuard" parent="Structures" instance=ExtResource("4_guard")]
+position = Vector2(1160, 336)
+team_id = 1
+structure_id = &"red_right_guard"
+lane = 1
+
+[node name="RedCore" parent="Structures" instance=ExtResource("5_core")]
+position = Vector2(960, 228)
+team_id = 1
+structure_id = &"red_core"
+
+[node name="HUD" parent="." instance=ExtResource("6_hud")]
