@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/arena/arena.gd" id="1_arena"]
+[ext_resource type="Texture2D" path="res://assets/arena/fortress.webp" id="2_fortress"]
+[ext_resource type="Texture2D" path="res://assets/arena/decorations/blue_banner.webp" id="3_blue"]
+[ext_resource type="Texture2D" path="res://assets/arena/decorations/red_banner.webp" id="4_red"]
+[ext_resource type="Texture2D" path="res://assets/arena/decorations/brazier.webp" id="5_brazier"]
 
 [node name="Arena" type="Node2D"]
 script = ExtResource("1_arena")
+fortress = ExtResource("2_fortress")
+blue_banner = ExtResource("3_blue")
+red_banner = ExtResource("4_red")
+brazier = ExtResource("5_brazier")
