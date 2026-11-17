@@ -49,10 +49,12 @@ totals, an undecided result, and the unpaused state.
 
 ## Phase 1 interaction
 
-The HUD shows remaining time, all six HP values, team HP percentages, pause,
-and results. F3 toggles optional per-tower damage buttons. Each click removes
-100 HP by default, using the configurable debug damage amount. R restarts;
-Space pauses/resumes. With no debug damage, an idle match ends in a draw.
+Choose Phase 1 Live Match from the battle setup. The HUD shows time, all six HP
+values, each team's remaining structure HP percentage, and results. F3 toggles
+per-tower damage buttons. Each click removes 100 HP by default, using the
+configurable debug damage amount. R restarts, and Space pauses or resumes.
+An untouched match ends in a draw. In debug builds, F4 toggles sample card,
+energy, unit, and AI visuals while the match continues under the same rules.
 
 ## Planned rules, not implemented in this stage
 

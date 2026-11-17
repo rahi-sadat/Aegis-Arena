@@ -1,6 +1,10 @@
 # Phase 1 architecture
 
-## Current scene tree
+## Screen flow and battle scene
+
+`TitleScreen.tscn` is the startup scene. Play and Game Modes open
+`PreBattleScreen.tscn`, which launches `Main.tscn` for the Phase 1 match.
+The pause and result screens return to the title.
 
 ```text
 Main (Node; scripts/core/main.gd)
@@ -15,14 +19,21 @@ Main (Node; scripts/core/main.gd)
 |   `-- RedCore        (CoreTower.tscn)
 `-- HUD (CanvasLayer; HUD.tscn)
     `-- Interface (Control)
-        |-- Header, timer, buttons, team HP panels, footer (built by HUD)
-        `-- MatchResultPanel (Control; MatchResultPanel.tscn)
-            |-- Shade
-            `-- Panel / Margin / Rows
+        |-- BoardVignette and BattlePreview
+        |-- BlueCommander, TimerFrame, RedCommander
+        |-- Minimap and AIInsight
+        |-- CommandStrip
+        |   |-- Fighter, Ranger, Tank, Mage, Arrow
+        |   `-- Energy
+        |-- MatchControls, PreviewBadge, DebugDamage
+        |-- PauseMenu
+        |-- MatchResultPanel
+        `-- SettingsPanel
 ```
 
-Each reusable tower scene contains `Title` and `Health` labels and draws its
-body and HP bar using Godot primitives. `Main` runs after its children are ready,
+Each reusable tower scene contains a `TowerArt` sprite and `Title` and `Health`
+labels. It draws its HP bar and changes from the team tower sprite to a ruin
+on destruction. `Main` runs after its children are ready,
 wires HUD requests, gathers the six structures, and starts the match. Restart
 reuses the existing scene instances and reconnects each signal once.
 
@@ -37,10 +48,13 @@ reuses the existing scene instances and reconnects each signal once.
 | `core/game_balance.gd` | Resource schema for match duration and debug damage amount |
 | `combat/structure_data.gd` | Resource schema for tower type, name, and starting HP |
 | `combat/structure.gd` | Live HP, damage clamping, destruction, reset, tower presentation |
-| `arena/arena.gd` | Placeholder arena, lane, territory, river, and bridge drawing |
+| `arena/arena.gd` | Painted arena and layers for banners and braziers |
 | `ui/hud.gd` | Live HUD presentation and user-request signals |
 | `ui/match_result_panel.gd` | Final result presentation and restart request |
+| `ui/components/` | Commander panels, minimap, card slots, energy, insight, and overlays |
+| `ui/title_screen.gd`, `ui/pre_battle_screen.gd` | Menus and scene navigation |
 | `tests/test_phase_one.gd` | Headless integration and numeric victory-rule checks |
+| `tests/test_presentation.gd` | Screen flow, live HUD, preview isolation, and optional render capture |
 
 No global/autoload singleton is needed. Ordinary operations are local calls.
 Structures emit `damaged` and `destroyed`; the manager observes these and emits
@@ -51,6 +65,11 @@ and damage requests. It cannot decide or change a winner itself.
 The manager freezes its own clock rather than pausing the entire SceneTree,
 so UI controls remain usable. Future live gameplay systems must honor the
 manager's pause and terminal state. There are no live combat systems yet.
+
+The minimap projects actual tower positions onto board geometry from
+`ArenaLayout`. F4 in debug builds toggles presentation samples in `BattlePreview`,
+the deck, energy, and AI Insight. Preview illustrations, projectile effects, and
+sample values have no write path to the manager or the structures.
 
 ## Shared data
 

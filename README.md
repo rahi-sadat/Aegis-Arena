@@ -1,94 +1,79 @@
 # Aegis Arena
 
-A Godot 4.x / GDScript university project for a two-player tactical card battle.
-The current implementation is **Phase 1 only**: the arena, six structures, HP,
-the match timer, victory rules, and a basic HUD with optional damage controls.
+A Godot 4.x tactical card-battle university project. The current Phase 1 build
+runs the two-lane arena, six towers, match clock, and victory rules with a fantasy
+title screen, battle setup, and live HUD.
 
 ## Run
 
-1. Install the standard desktop version of [Godot 4.x](https://godotengine.org/download/).
-2. In Godot's Project Manager, choose **Import**, select `project.godot`, then **Edit**.
-3. Press **F6** with `scenes/main/Main.tscn` open, or **F5** to run the project.
+1. Install the standard desktop version of [Godot](https://godotengine.org/download/).
+   This build is verified with Godot 4.7.2.
+2. In Godot's Project Manager, import `project.godot` and open the project.
+3. Press **F5**, pick **Play** or **Game Modes**, and choose **Enter Battle** under
+   **Phase 1 Live Match**. Open `scenes/main/Main.tscn` and press **F6** to start
+   the battle directly.
 
-The project renders a 1920 x 1080 canvas in a default 1280 x 720 desktop window,
-using the Compatibility renderer. All visuals are Godot placeholder shapes and
-the built-in font. No external packages or assets are required.
+The game uses the Compatibility renderer with a 1920 × 1080 logical canvas and a
+1280 × 720 default window. Ultrawide windows center the 16:9 play area with side
+margins. The visual assets are bundled and there are no external packages. The
+empty `main.py` is unrelated to the game.
 
-From a terminal with the Godot executable on PATH:
-
-```powershell
-godot --path . --editor
-godot --path .
-```
-
-Replace `godot` with your actual Godot executable path if necessary.
-The pre-existing empty `main.py` is unrelated to this Godot project.
-
-## Controls and checks
+## Battle controls
 
 | Control | Action |
 | --- | --- |
-| Space / Pause button | Pause or resume the current match |
-| R / result panel button | Restart with full HP and 180 seconds |
-| F3 / Damage controls button | Show or hide six debug damage buttons |
-| A tower's damage button | Remove 100 HP from that tower |
+| Space or Esc / Pause | Pause or resume the match |
+| R / Restart on the pause or result screen | Reset the match to full HP and 3:00 |
+| F3 / F3 Debug | Toggle the six structure damage buttons |
+| Damage button | Remove 100 HP from that tower while the match is active |
+| F4 (debug builds) | Toggle sample AI, units, energy, and interactive card previews |
+| Minus or plus on the minimap and AI Insight | Collapse or expand the panel |
+| Settings | Set master volume, fullscreen, minimap visibility, and reduced motion |
+| Return to Title or Return to Menu | Go back to the title screen |
 
-Damage controls are hidden initially and disabled during pause or after a match.
-They exist to verify Phase 1 rules before units/combat are implemented. Damage
-is credited to the opposing team and overkill is excluded from the total.
+The timer, six tower HP labels, team HP percentages, and results use the live
+match. On a core defeat, the opposing team wins immediately. At timeout the match
+checks remaining structure HP percentage, then structure damage dealt. Equal
+scores produce a draw. See [the game rules](docs/game_rules.md).
 
-- Destroy either core with eight debug hits: the opposing side wins immediately.
-- Damage one guard, then let the timer expire: the side with more remaining
-  combined structure HP percentage wins.
-- Restart and leave all structures untouched: timeout produces a draw.
-- Pause: the countdown and debug damage stop. Restart also clears pause.
+Cards, energy, AI commanders, and speed adjustment appear as locked or planned
+features in the live match. **UI Preview Mode** displays clearly labeled sample
+values and effects. It leaves the actual match clock, HP, and outcomes intact.
 
-## Automated checks
+## Checks
 
-Run the import step once so Godot registers the script classes, then run the
-dependency-free test script:
+After importing the project, run:
 
 ```powershell
 godot --headless --path . --editor --quit
 godot --headless --path . --script res://tests/test_phase_one.gd
+godot --headless --path . --script res://tests/test_presentation.gd
 godot --headless --path . --quit-after 120
+godot --headless --path . --quit-after 120 res://scenes/main/Main.tscn
 ```
 
-The test runner returns a nonzero exit code for failed checks. It verifies the
-actual Main scene and manager, HP clamping, overkill, destruction, both core
-victories, pause/resume, reset, timeout, the percentage/damage/draw ordering,
-and HUD result visibility. The last command is a short runtime smoke check.
+The Phase 1 script checks the current match rules, including pause, reset, core
+wins, timeout, the damage tie-break, and draws. The presentation script exercises
+the menus, all tower indicators, debug damage through the HUD, and preview
+isolation. To save game-window PNGs, create an output directory and run without
+headless mode:
 
-Verified during implementation with **Godot 4.7.2 stable**: headless editor
-import completed without parser errors, **49 checks passed**, and the Main
-scene ran for 120 frames without script/runtime errors. Other Godot 4.x versions
-have not been tested. The portable verification runtime is in the system's
-temporary directory, not bundled with the project.
-
-The arena, expanded debug controls, and victory panel were also rendered with
-the Compatibility renderer and visually inspected. The core-damage HUD button
-signal was exercised through to the victory panel. Physical mouse/keyboard
-input has not been manually exercised. Local preview images and verification
-logs are in the ignored `.godot/` cache, not required game assets.
+```powershell
+godot --path . --script res://tests/test_presentation.gd -- --capture "C:/path/to/output" 1920x1080
+```
 
 ## Project layout
 
-- `scenes/`: Main, arena, reusable tower scenes, HUD, and match result panel.
-- `scripts/core/`: match orchestration, pure victory rules, constants, and settings.
-- `scripts/combat/`: live structure HP and shared structure definitions.
-- `scripts/arena/`, `scripts/ui/`: shape drawing and interface presentation.
-- `data/`: editable balance and tower resources, shared by every tower instance.
-- `tests/`: Phase 1 checks; no external test framework.
-- `docs/`: [rules](docs/game_rules.md) and [architecture](docs/architecture.md).
-- Reserved directories use `.gitkeep` files to preserve the planned structure.
-  They contain no placeholder algorithm implementations.
+- `scenes/ui/screens/` contains the title and pre-battle screens.
+- `scenes/main/` assembles the arena, game manager, six structures, and HUD.
+- `scenes/ui/components/` contains reusable commander panels, cards, map, energy
+  bar, AI Insight, pause, and settings.
+- `scripts/core/` owns match orchestration and numeric rules.
+- `scripts/combat/` owns structure state and health.
+- `assets/arena/` and `assets/ui/` contain the generated artwork and shared theme.
+  See [art and audio slots](assets/ASSET_REQUIREMENTS.md).
+- `docs/` contains the rules and [architecture](docs/architecture.md).
 
-## Scope and next phase
-
-This foundation has no units, attacks, energy, deployment, AI planning,
-pathfinding, fuzzy logic, Minimax, MCTS, or experiment logging. Without debug
-damage, both sides remain idle and draw after 180 seconds.
-
-Phase 2 adds shared unit data, energy, the three units, manual spawning,
-movement, deterministic targeting, attacks, damage, and death. A* follows in
-Phase 3; data-only search states and the forward model follow in Phase 4.
+Phase 2 adds actual energy, unit deployment, and combat. A* follows in Phase 3,
+and the data-only search state and forward model follow in Phase 4. The pre-battle
+screen identifies later commander and tactical-assessment milestones.
