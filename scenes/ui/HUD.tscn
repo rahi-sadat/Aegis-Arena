@@ -1,7 +1,19 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/MatchResultPanel.tscn" id="2_result"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/CommanderPanel.tscn" id="3_commander"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/Minimap.tscn" id="4_minimap"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/AIInsightPanel.tscn" id="5_insight"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/EnergyBar.tscn" id="6_energy"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/PauseMenu.tscn" id="7_pause"]
+[ext_resource type="PackedScene" path="res://scenes/ui/components/SettingsPanel.tscn" id="8_settings"]
+[ext_resource type="Script" path="res://scripts/ui/components/battle_preview.gd" id="9_preview"]
+[ext_resource type="Shader" path="res://assets/ui/effects/battle_vignette.gdshader" id="10_vignette"]
+[ext_resource type="Theme" path="res://assets/ui/arena_theme.tres" id="11_theme"]
+
+[sub_resource type="ShaderMaterial" id="Vignette"]
+shader = ExtResource("10_vignette")
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_hud")
@@ -14,5 +26,76 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme = ExtResource("11_theme")
+
+[node name="BoardVignette" type="ColorRect" parent="Interface"]
+material = SubResource("Vignette")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="BattlePreview" type="Control" parent="Interface"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("9_preview")
+
+[node name="BlueCommander" instance=ExtResource("3_commander") parent="Interface"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 26.0
+offset_right = 486.0
+offset_bottom = 148.0
+
+[node name="RedCommander" instance=ExtResource("3_commander") parent="Interface"]
+layout_mode = 0
+offset_left = 1434.0
+offset_top = 26.0
+offset_right = 1888.0
+offset_bottom = 148.0
+
+[node name="TimerFrame" type="Panel" parent="Interface"]
+layout_mode = 0
+offset_left = 855.0
+offset_top = 20.0
+offset_right = 1065.0
+offset_bottom = 115.0
+
+[node name="Minimap" instance=ExtResource("4_minimap") parent="Interface"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 829.0
+offset_right = 302.0
+offset_bottom = 1054.0
+
+[node name="AIInsight" instance=ExtResource("5_insight") parent="Interface"]
+layout_mode = 0
+offset_left = 1518.0
+offset_top = 221.0
+offset_right = 1888.0
+offset_bottom = 681.0
+
+[node name="CommandStrip" type="Panel" parent="Interface"]
+layout_mode = 0
+offset_left = 543.0
+offset_top = 869.0
+offset_right = 1377.0
+offset_bottom = 1060.0
+
+[node name="Energy" instance=ExtResource("6_energy") parent="Interface/CommandStrip"]
+layout_mode = 0
+offset_left = 25.0
+offset_top = 152.0
+offset_right = 810.0
+offset_bottom = 184.0
+
+[node name="PauseMenu" parent="Interface" instance=ExtResource("7_pause")]
 
 [node name="MatchResultPanel" parent="Interface" instance=ExtResource("2_result")]
+
+[node name="SettingsPanel" parent="Interface" instance=ExtResource("8_settings")]
