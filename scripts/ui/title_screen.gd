@@ -25,14 +25,9 @@ func _ready() -> void:
 	var crest := ArenaStyle.panel(self, Rect2(102, 112, 78, 78))
 	ArenaStyle.art(crest, Rect2(5, 5, 68, 68), DeckArt.BACK)
 	ArenaStyle.text(self, Rect2(197, 130, 550, 33), "TACTICAL CARD BATTLE", 18, ArenaStyle.GOLD, true)
-	var title := ArenaStyle.text(self, Rect2(94, 193, 690, 182), "AEGIS\nARENA", 82, ArenaStyle.TEXT, true)
-	title.add_theme_color_override("font_shadow_color", Color("#030811"))
-	title.add_theme_constant_override("shadow_offset_x", 3)
-	title.add_theme_constant_override("shadow_offset_y", 4)
-	var rule := ColorRect.new()
-	rule.color = Color(ArenaStyle.GOLD, 0.68)
-	rule.mouse_filter = MOUSE_FILTER_IGNORE
-	ArenaStyle.mount(self, rule, Rect2(104, 398, 405, 2))
+	var logo := ArenaStyle.art(self, Rect2(70, 205, 620, 207), DeckArt.LOGO)
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+	logo.tooltip_text = "Aegis Arena"
 	_main_action = _menu_button("PLAY", 441, _open_battle, true)
 	_menu_button("GAME MODES", 519, _open_battle)
 	_menu_button("HOW TO PLAY", 597, _open_help)

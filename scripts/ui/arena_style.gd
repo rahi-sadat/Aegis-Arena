@@ -2,10 +2,13 @@ class_name ArenaStyle
 extends RefCounted
 ## Shared typography, ornament, and interaction states for the arena UI.
 
-const GOLD := Color("#ebc583")
+const GOLD := Color("#f2c76b")
 const INK := Color("#0c1627")
 const TEXT := Color("#f9efdc")
-const MUTED := Color("#aebdce")
+const MUTED := Color("#b4c3d8")
+const OUTLINE := Color("#060a12")
+const GLASS := Color(0.047, 0.071, 0.118, 0.9)
+const EDGE_BLUE := Color("#5b8fd8")
 const LINE := Color("#8c673c")
 const VIOLET := Color("#b88aff")
 
@@ -14,7 +17,8 @@ static var _serif: SystemFont
 static func display_font() -> SystemFont:
 	if _serif == null:
 		_serif = SystemFont.new()
-		_serif.font_names = PackedStringArray(["Cinzel", "Georgia", "DejaVu Serif", "serif"])
+		# Clean bold sans, matching the battle-view HUD in the design video.
+		_serif.font_names = PackedStringArray(["Segoe UI", "Helvetica Neue", "Arial", "sans-serif"])
 		_serif.font_weight = 700
 	return _serif
 
@@ -33,9 +37,10 @@ static func panel(parent: Node, rect: Rect2, accent: Color = GOLD) -> Panel:
 	return surface
 
 static func decorate(surface: Panel, accent: Color = GOLD) -> void:
-	var style := box(Color(0.039, 0.066, 0.108, 0.95), accent.darkened(0.48), 2, 9)
-	style.shadow_color = Color(0.0, 0.0, 0.0, 0.54)
-	style.shadow_size = 8
+	var style := box(GLASS, Color(accent, 0.55), 1, 12)
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.5)
+	style.shadow_size = 12
+	style.shadow_offset = Vector2(0, 4)
 	surface.add_theme_stylebox_override("panel", style)
 	surface.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var trim := ArenaTrim.new()
@@ -55,6 +60,8 @@ static func label(value: String, font_size: int, color: Color = TEXT, serif: boo
 	line.add_theme_color_override("font_color", color)
 	if serif:
 		line.add_theme_font_override("font", display_font())
+		line.add_theme_color_override("font_outline_color", OUTLINE)
+		line.add_theme_constant_override("outline_size", 3)
 	line.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return line
@@ -107,22 +114,50 @@ static func format_button(control: Button, value: String, primary: bool = false)
 	control.text = value
 	control.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	control.add_theme_font_override("font", display_font())
-	control.add_theme_font_size_override("font_size", 19)
-	control.add_theme_color_override("font_color", Color("#20150f") if primary else TEXT)
-	control.add_theme_color_override("font_hover_color", Color("#20150f") if primary else GOLD)
-	control.add_theme_color_override("font_pressed_color", Color("#20150f") if primary else GOLD)
-	control.add_theme_color_override("font_focus_color", Color("#20150f") if primary else GOLD)
-	control.add_theme_color_override("font_disabled_color", MUTED)
-	control.add_theme_stylebox_override("normal", box(Color("#d6a855") if primary else Color("#16263c"), GOLD if primary else LINE, 2))
-	control.add_theme_stylebox_override("hover", box(Color("#f3ce83") if primary else Color("#253955"), GOLD, 2))
-	control.add_theme_stylebox_override("pressed", box(Color("#bd833b") if primary else Color("#111b2e"), GOLD, 2))
-	control.add_theme_stylebox_override("disabled", box(Color("#142033"), Color("#435065"), 1))
-	var focus := box(Color.TRANSPARENT, Color("#ffdf99"), 2)
-	focus.expand_margin_left = 3
-	focus.expand_margin_right = 3
-	focus.expand_margin_top = 3
-	focus.expand_margin_bottom = 3
+	control.add_theme_font_size_override("font_size", 18)
+	var ink := Color("#241606") if primary else TEXT
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+		control.add_theme_color_override(state, ink)
+	control.add_theme_color_override("font_disabled_color", Color("#7f8899"))
+	if primary:
+		control.add_theme_stylebox_override("normal", glass(Color("#e2ab48"), Color("#ffe3a3"), Color("#e2ab48")))
+		control.add_theme_stylebox_override("hover", glass(Color("#f0bd5c"), Color("#fff0c8"), Color("#ffd27a")))
+		control.add_theme_stylebox_override("pressed", glass(Color("#c88f33"), Color("#ffe3a3"), Color("#e2ab48")))
+	else:
+		control.add_theme_stylebox_override("normal", glass(Color("#152238"), Color(EDGE_BLUE, 0.55)))
+		control.add_theme_stylebox_override("hover", glass(Color("#1d3050"), Color(EDGE_BLUE, 0.95), EDGE_BLUE))
+		control.add_theme_stylebox_override("pressed", glass(Color("#101a2b"), EDGE_BLUE))
+	control.add_theme_stylebox_override("disabled", glass(Color(0.08, 0.1, 0.15, 0.85), Color(1, 1, 1, 0.1)))
+	var focus := box(Color.TRANSPARENT, Color("#ffe6a8"), 2, 10)
+	focus.set_expand_margin_all(3)
 	control.add_theme_stylebox_override("focus", focus)
+
+## Dark-glass button face with a thin luminous edge and an optional outer glow.
+static func glass(fill: Color, edge: Color, glow: Color = Color.TRANSPARENT) -> StyleBoxFlat:
+	var style := box(fill, edge, 1, 10)
+	style.border_width_top = 2
+	if glow.a > 0.0:
+		style.shadow_color = Color(glow, 0.45)
+		style.shadow_size = 8
+	else:
+		style.shadow_color = Color(0, 0, 0, 0.35)
+		style.shadow_size = 4
+		style.shadow_offset = Vector2(0, 2)
+	return style
+
+## Makes a toggle button read as "chosen" when pressed: team-coloured glow and edge.
+static func selectable(control: Button, accent: Color = GOLD) -> void:
+	control.toggle_mode = true
+	control.add_theme_color_override("font_color", TEXT)
+	control.add_theme_color_override("font_hover_color", TEXT)
+	control.add_theme_stylebox_override("normal", glass(Color("#131c2c"), Color(1, 1, 1, 0.14)))
+	control.add_theme_stylebox_override("hover", glass(Color("#1a2638"), Color(accent, 0.7)))
+	var chosen := glass(accent.darkened(0.45), accent.lightened(0.3), accent)
+	chosen.set_border_width_all(2)
+	control.add_theme_stylebox_override("pressed", chosen)
+	control.add_theme_stylebox_override("hover_pressed", chosen)
+	control.add_theme_color_override("font_pressed_color", Color.WHITE)
+	control.add_theme_color_override("font_hover_pressed_color", Color.WHITE)
 
 static func bar(accent: Color) -> ProgressBar:
 	var meter := ProgressBar.new()
@@ -130,13 +165,16 @@ static func bar(accent: Color) -> ProgressBar:
 	meter.max_value = 1.0
 	meter.step = 0.0
 	meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	meter.add_theme_stylebox_override("background", box(Color("#080e1a"), Color("#584737"), 1, 4))
-	meter.add_theme_stylebox_override("fill", box(accent.darkened(0.13), accent.lightened(0.22), 1, 4))
+	meter.add_theme_stylebox_override("background", box(Color("#070b14"), OUTLINE, 2, 6))
+	meter.add_theme_stylebox_override("fill", box(accent, accent.darkened(0.35), 2, 6))
 	return meter
 
 static func art(parent: Node, rect: Rect2, texture: Texture2D) -> TextureRect:
 	var picture := TextureRect.new()
 	picture.texture = texture
+	# Artwork is drawn far below its source size; mipmaps keep it smooth. This is set
+	# per image, not project-wide, because font glyph atlases have no mipmaps.
+	picture.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE

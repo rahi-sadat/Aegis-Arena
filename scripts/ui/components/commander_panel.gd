@@ -6,6 +6,8 @@ extends Panel
 var _health: ProgressBar
 var _score: Label
 var _core: Label
+## Shows the commander's selected search algorithm (or the human player).
+var logic_label: Label
 
 func configure(team_id: int, artwork: Texture2D, mirrored: bool) -> void:
 	var accent := GameConstants.team_color(team_id)
@@ -22,6 +24,11 @@ func configure(team_id: int, artwork: Texture2D, mirrored: bool) -> void:
 	_health.fill_mode = ProgressBar.FILL_END_TO_BEGIN if mirrored else ProgressBar.FILL_BEGIN_TO_END
 	ArenaStyle.mount(self, _health, Rect2(copy_x, 75, 298, 8))
 	_score = ArenaStyle.text(self, Rect2(copy_x, 87, 298, 23), "", 16, ArenaStyle.MUTED, false, alignment)
+	var badge := ArenaStyle.panel(self, Rect2(0, size.y + 6, size.x, 36), accent)
+	badge.name = &"LogicBadge"
+	ArenaStyle.icon(badge, Rect2(size.x - 34 if mirrored else 14, 9, 18, 18), ArenaIcon.Kind.CRYSTAL, accent)
+	logic_label = ArenaStyle.text(badge, Rect2(14 if mirrored else 42, 0, size.x - 56, 36), "", 16, ArenaStyle.TEXT, true, alignment)
+	logic_label.text = ("YOU  ·  " if MatchConfig.is_human(team_id) else "AI  ·  ") + MatchConfig.describe(team_id)
 
 func update_status(core: ArenaStructure, fraction: float, immediate: bool) -> void:
 	_core.text = "CORE   %d / %d HP" % [ceili(core.current_hp), core.max_hp]

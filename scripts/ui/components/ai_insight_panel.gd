@@ -17,10 +17,12 @@ var _unit_portrait: TextureRect
 var _bars: Array[ProgressBar] = []
 var _values: Array[Label] = []
 var _expanded: bool = true
+var _title: Label
+var _team: int = GameConstants.Team.BLUE
 
 func _ready() -> void:
 	ArenaStyle.decorate(self, GameConstants.BLUE_COLOR)
-	ArenaStyle.text(self, Rect2(22, 10, 267, 36), "AI INSIGHT · BLUE", 20, ArenaStyle.GOLD, true)
+	_title = ArenaStyle.text(self, Rect2(22, 10, 280, 36), "AI INSIGHT · BLUE", 20, ArenaStyle.GOLD, true)
 	_toggle = ArenaStyle.button("−")
 	_toggle.tooltip_text = "Collapse AI insight"
 	ArenaStyle.mount(self, _toggle, Rect2(306, 12, 42, 33))
@@ -41,14 +43,15 @@ func _ready() -> void:
 	ArenaStyle.text(_body, Rect2(0, 166, 324, 25), "CURRENT INTENT", 16, ArenaStyle.GOLD, true)
 	_intent = ArenaStyle.text(_body, Rect2(0, 194, 324, 26), "", 17, ArenaStyle.TEXT, true)
 	ArenaStyle.text(_body, Rect2(0, 234, 324, 24), "CHOSEN ACTION", 16, ArenaStyle.GOLD, true)
-	_unit_portrait = ArenaStyle.art(_body, Rect2(0, 264, 58, 61), null)
+	_unit_portrait = ArenaStyle.art(_body, Rect2(0, 262, 48, 64), null)
 	_action = ArenaStyle.text(_body, Rect2(0, 265, 324, 26), "", 17, ArenaStyle.TEXT)
 	_cost = ArenaStyle.text(_body, Rect2(70, 296, 250, 24), "", 16, ArenaStyle.VIOLET)
 	_details = ArenaStyle.text(_body, Rect2(0, 332, 324, 60), "", 15, ArenaStyle.MUTED)
 	set_preview(false)
 
 func set_preview(enabled: bool, tank_art: Texture2D = null) -> void:
-	_status.text = "SAMPLE ASSESSMENT" if enabled else "AI SYSTEMS NOT ACTIVE"
+	var algorithm: String = MatchConfig.ALGORITHM_SHORT[MatchConfig.algorithms[_team]]
+	_status.text = "SAMPLE ASSESSMENT" if enabled else algorithm + "  ·  AWAITING UNITS"
 	for index in _bars.size():
 		_bars[index].value = SAMPLE[index] if enabled else 0.0
 		_values[index].text = "%.2f" % SAMPLE[index] if enabled else "—"
@@ -60,7 +63,14 @@ func set_preview(enabled: bool, tank_art: Texture2D = null) -> void:
 	_action.size.x = 250.0 if enabled else 324.0
 	_action.text = "TANK  →  LEFT LANE" if enabled else "Awaiting commander logic"
 	_cost.text = "◆  5 energy" if enabled else ""
-	_details.text = "Sample deployment for HUD review." if enabled else "A* navigation · Phase 3\nFuzzy logic · Phase 6\nMinimax + alpha-beta · Phase 7  /  MCTS · 8"
+	_details.text = "Sample deployment for HUD review." if enabled else "Blue: %s\nRed: %s" % [MatchConfig.describe(GameConstants.Team.BLUE), MatchConfig.describe(GameConstants.Team.RED)]
+
+## Follows the AI-controlled commander: Blue in AI vs AI, Red when a human plays Blue.
+func follow_commander(team: int) -> void:
+	_team = team
+	_title.text = "AI INSIGHT · " + GameConstants.team_name(team).to_upper()
+	_status.add_theme_color_override("font_color", GameConstants.team_color(team))
+	set_preview(false)
 
 func _collapse() -> void:
 	_expanded = not _expanded

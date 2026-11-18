@@ -42,6 +42,7 @@ var _deck_status: Label
 func _ready() -> void:
 	blue.configure(GameConstants.Team.BLUE, DeckArt.BLUE_PORTRAIT, false)
 	red.configure(GameConstants.Team.RED, DeckArt.RED_PORTRAIT, true)
+	insight.follow_commander(GameConstants.Team.RED if MatchConfig.is_human(GameConstants.Team.BLUE) else GameConstants.Team.BLUE)
 	_build_timer()
 	_build_deck()
 	_build_controls()
@@ -76,17 +77,17 @@ func _build_deck() -> void:
 	ArenaStyle.decorate(deck)
 	var caption := ArenaStyle.text(deck, Rect2(26, 9, 375, 23), "COMMAND DECK", 16, ArenaStyle.GOLD, true)
 	caption.tooltip_text = "Illustrated card lineup for Phase 2 and later"
-	_deck_status = ArenaStyle.text(deck, Rect2(398, 9, 253, 23), "DEPLOYMENT LOCKED", 14, ArenaStyle.MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
+	_deck_status = ArenaStyle.text(deck, Rect2(380, 9, 253, 23), "DEPLOYMENT LOCKED", 14, ArenaStyle.MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
 	for index in DeckArt.NAMES.size():
 		var card := CARD.instantiate() as BattleCardSlot
 		card.name = DeckArt.NAMES[index]
-		ArenaStyle.mount(deck, card, Rect2(24 + index * 128, 36, 114, 112))
+		ArenaStyle.mount(deck, card, Rect2(22 + index * 124, 32, 110, 118))
 		card.build(index, DeckArt.CARDS[index])
 		card.inspected.connect(_select_preview_card)
 		_cards.append(card)
-	ArenaStyle.text(deck, Rect2(683, 32, 127, 24), "NEXT CARD", 14, ArenaStyle.GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
-	var next := ArenaStyle.panel(deck, Rect2(695, 58, 103, 90))
-	_next_art = ArenaStyle.art(next, Rect2(5, 5, 93, 80), DeckArt.BACK)
+	ArenaStyle.text(deck, Rect2(664, 9, 150, 23), "NEXT", 14, ArenaStyle.GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
+	var next := ArenaStyle.panel(deck, Rect2(695, 32, 88, 118))
+	_next_art = ArenaStyle.art(next, Rect2(4, 4, 80, 110), DeckArt.BACK)
 	_next_art.modulate = Color(0.61, 0.64, 0.72)
 	deck.move_child(energy, -1)
 
@@ -110,11 +111,11 @@ func _build_controls() -> void:
 	debug.pressed.connect(toggle_debug)
 
 func _build_preview_label() -> void:
-	_preview_label = ArenaStyle.panel(interface, Rect2(32, 155, 545, 42), ArenaStyle.VIOLET)
+	_preview_label = ArenaStyle.panel(interface, Rect2(32, 200, 545, 42), ArenaStyle.VIOLET)
 	_preview_label.name = &"PreviewBadge"
 	ArenaStyle.text(_preview_label, Rect2(10, 0, 525, 42), "UI PREVIEW — SAMPLE DATA — NOT LIVE GAMEPLAY", 16, Color("#eddcff"), true, HORIZONTAL_ALIGNMENT_CENTER)
 	_preview_label.hide()
-	_debug_panel = ArenaStyle.panel(interface, Rect2(32, 213, 334, 311))
+	_debug_panel = ArenaStyle.panel(interface, Rect2(32, 256, 334, 311))
 	_debug_panel.name = &"DebugDamage"
 	ArenaStyle.text(_debug_panel, Rect2(17, 9, 300, 33), "STRUCTURE DAMAGE  [F3]", 16, ArenaStyle.GOLD, true)
 	_debug_panel.hide()
