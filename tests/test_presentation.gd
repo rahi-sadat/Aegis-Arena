@@ -39,8 +39,24 @@ func _run() -> void:
 	_press(current_scene, "PLAY")
 	await scene_changed
 	_check(current_scene.name == &"PreBattleScreen", "Play advances to battle setup")
-	_check(_find_button(current_scene, "AI VS AI  ·  PLANNED").disabled, "AI vs AI is locked")
-	_check(_find_button(current_scene, "HUMAN VS AI  ·  PLANNED").disabled, "Human vs AI is locked")
+	MatchConfig.reset()
+	var setup := current_scene
+	_check(MatchConfig.algorithms == [MatchConfig.Algorithm.ALPHA_BETA, MatchConfig.Algorithm.MCTS], "Default commanders are α–β and MCTS")
+	_named(setup, "BlueAlgorithm2").pressed.emit()
+	_check(MatchConfig.algorithms[GameConstants.Team.BLUE] == MatchConfig.Algorithm.MCTS, "Blue algorithm can be switched to MCTS")
+	_named(setup, "BlueIncrease").pressed.emit()
+	_check(MatchConfig.mcts_iterations[GameConstants.Team.BLUE] == MatchConfig.DEFAULT_ITERATIONS + MatchConfig.ITERATION_STEP, "MCTS iterations increase")
+	_named(setup, "RedAlgorithm0").pressed.emit()
+	_check(MatchConfig.algorithms[GameConstants.Team.RED] == MatchConfig.Algorithm.MINIMAX, "Red algorithm can be switched to Minimax")
+	for step in 10:
+		_named(setup, "RedDecrease").pressed.emit()
+	_check(MatchConfig.search_depth[GameConstants.Team.RED] == MatchConfig.DEPTH_RANGE.x and _named(setup, "RedDecrease").disabled, "Search depth clamps at its minimum")
+	_named(setup, "Mode1").pressed.emit()
+	_check(MatchConfig.mode == MatchConfig.Mode.HUMAN_VS_AI and _named(setup, "BlueAlgorithm0").disabled, "Human vs AI hands Blue to the player")
+	_named(setup, "Mode0").pressed.emit()
+	_check(MatchConfig.mode == MatchConfig.Mode.AI_VS_AI and not _named(setup, "BlueAlgorithm0").disabled, "AI vs AI restores both search commanders")
+	MatchConfig.reset()
+	_named(setup, "Mode0").pressed.emit()
 	await _capture("pre-battle")
 	_press(current_scene, "ENTER BATTLE")
 	await scene_changed
@@ -53,6 +69,7 @@ func _run() -> void:
 	_check(hud.minimap.visible and hud.insight.visible, "Minimap and AI Insight load")
 	var fighter: BattleCardSlot = hud.deck.get_node("Fighter")
 	_check(fighter.disabled, "Cards are locked in live mode")
+	_check(hud.blue.logic_label.text.contains("Minimax + α–β") and hud.red.logic_label.text.contains("MCTS"), "Commander badges show the selected algorithms")
 	await _capture("battle")
 
 	var minimap_height := hud.minimap.size.y
@@ -164,6 +181,11 @@ func _find_button(from: Node, caption: String) -> Button:
 		if match_button != null:
 			return match_button
 	return null
+
+func _named(from: Node, node_name: String) -> Button:
+	var found := from.find_child(node_name, true, false) as Button
+	_check(found != null, "Found control " + node_name)
+	return found
 
 func _find_panel(from: Node, panel_name: String) -> ArenaSettingsPanel:
 	for child in from.get_children():
