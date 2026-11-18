@@ -49,7 +49,8 @@ totals, an undecided result, and the unpaused state.
 
 ## Phase 1 interaction
 
-Choose Phase 1 Live Match from the battle setup. The HUD shows time, all six HP
+Choose a battle mode and each commander's algorithm in the battle setup, then
+enter the battle. The arena currently runs the Phase 1 rules for every setup. The HUD shows time, all six HP
 values, each team's remaining structure HP percentage, and results. F3 toggles
 per-tower damage buttons. Each click removes 100 HP by default, using the
 configurable debug damage amount. R restarts, and Space pauses or resumes.

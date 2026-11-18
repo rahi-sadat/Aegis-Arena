@@ -45,6 +45,7 @@ reuses the existing scene instances and reconnects each signal once.
 | `core/game_manager.gd` | Timer, pause, match lifetime, damage attribution, result signals |
 | `core/match_rules.gd` | Pure numeric percentage, damage tie-break, and draw calculation |
 | `core/game_constants.gd` | Team/result identifiers, team names, team colors |
+| `core/match_config.gd` | Battle-setup choices: mode, per-commander algorithm, depth/iterations |
 | `core/game_balance.gd` | Resource schema for match duration and debug damage amount |
 | `combat/structure_data.gd` | Resource schema for tower type, name, and starting HP |
 | `combat/structure.gd` | Live HP, damage clamping, destruction, reset, tower presentation |

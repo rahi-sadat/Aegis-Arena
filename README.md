@@ -9,8 +9,8 @@ title screen, battle setup, and live HUD.
 1. Install the standard desktop version of [Godot](https://godotengine.org/download/).
    This build is verified with Godot 4.7.2.
 2. In Godot's Project Manager, import `project.godot` and open the project.
-3. Press **F5**, pick **Play** or **Game Modes**, and choose **Enter Battle** under
-   **Phase 1 Live Match**. Open `scenes/main/Main.tscn` and press **F6** to start
+3. Press **F5**, pick **Play** or **Game Modes**, choose the battle mode and each
+   commander's search algorithm, then press **Enter Battle**. Open `scenes/main/Main.tscn` and press **F6** to start
    the battle directly.
 
 The game uses the Compatibility renderer with a 1920 × 1080 logical canvas and a
@@ -76,4 +76,7 @@ godot --path . --script res://tests/test_presentation.gd -- --capture "C:/path/t
 
 Phase 2 adds actual energy, unit deployment, and combat. A* follows in Phase 3,
 and the data-only search state and forward model follow in Phase 4. The pre-battle
-screen identifies later commander and tactical-assessment milestones.
+screen already records the battle mode (AI vs AI or Human vs AI) and each
+commander's algorithm — Minimax, Minimax + α–β, or MCTS — with its search depth
+or iteration count in `MatchConfig` (`scripts/core/match_config.gd`). The HUD
+shows these choices; the search agents will read them when they are implemented.
