@@ -23,8 +23,9 @@ GDScript functions in `scripts/ai/`; there are no Python services or packages.
 
 | Control | Action |
 | --- | --- |
-| 1-5 or a card click | Select a ready card in Human vs AI |
-| A / D or Left / Right | Queue the selected card for Blue's next deployment slot |
+| 1-5 or a card click | Select a ready card and pause the match for human planning |
+| A / D, Left / Right buttons, or a lane click | Confirm the selected card, resume, and queue it for Blue's next slot |
+| Tab / Pause & Plan | Enter or leave tactical planning without deploying |
 | W / Wait | Queue Wait; the last queued choice replaces the earlier one |
 | Space or Esc / Pause | Pause or resume the match |
 | R / Restart | Reset the battle |
@@ -46,6 +47,18 @@ units fight. Start with 10 energy, regenerate 1/s, and use fixed spawn points an
 an eight-unit cap per team. Fighter, Ranger, and Tank deploy units; Mage and Arrow
 damage enemy units in one lane. Empty-lane spells are unavailable. The deck stays
 fixed. Human Blue queues a move between its slots; no input means Wait.
+
+Human decisions have no wall-clock deadline while planning: selecting a ready
+card freezes combat, the match timer, energy, and cooldowns. Choose a lane to
+resume and queue the move. Tab, Space, or Esc also resumes without confirming a
+new move. The original 0.75-second alternating simulation slots remain unchanged.
+
+The battle HUD uses compact dark panels. Fighter, Ranger, and Tank have distinct
+animated swordsman, archer, and stone-golem sprites with matching card portraits,
+ground contact shadows, and frame-specific foot anchors. Sword swings, arrows,
+golem impacts, tower shots, and both spells have visual feedback. Cooling cards
+show a translucent circular progress ring and remaining seconds. These are
+presentation changes; the numeric combat and search modules are unchanged.
 
 Tested live defaults are depth 2 and 20 MCTS trials with a six-ply horizon. Live
 controls permit depths 1-2 and 10-30 trials. Larger searches remain possible in
@@ -69,7 +82,11 @@ is not on PATH:
 The suite checks original match/UI behavior, combat, state isolation, the forward
 model, fuzzy arithmetic, independent exhaustive Minimax results, alpha-beta
 equivalence, seeded MCTS, scheduler timing, and JSON replay. `-Rendered` captures
-the real game and tree overlays under `output/evidence/screenshots/`. Test logs
+the real game and tree overlays under `output/evidence/screenshots/`, plus
+planning, distinct troop/attack, and 1280x720 captures under
+`output/evidence/ui_refresh/`. The UI refresh checks verify frozen planning
+state, mouse deployment, every animation's ground anchor, cooldowns, and that
+effects cannot mutate the numeric state. Test logs
 and isolated runtime data live in the ignored `build/` folder. For the original
 menu/result screenshot suite, create an output directory and run:
 
@@ -89,6 +106,8 @@ godot --path . --script res://tests/test_presentation.gd -- --capture 'C:/path/t
 - `scripts/movement/` contains the manual grid/A* implementation.
 - `scripts/debug/` contains plain decision-trace dictionaries and export.
 - `assets/` contains the artwork. See [art and audio slots](assets/ASSET_REQUIREMENTS.md).
+  The new troop atlas layout and exact generation prompts are in
+  [troop art notes](assets/units/ART_NOTES.md).
 - `docs/` contains the [rules](docs/game_rules.md), [architecture](docs/architecture.md),
   and [implementation walkthrough](docs/implementation.md).
 

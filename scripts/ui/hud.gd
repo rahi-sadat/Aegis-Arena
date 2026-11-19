@@ -9,6 +9,8 @@ signal title_requested
 signal deployment_requested(move: Dictionary)
 signal trace_requested
 signal routes_requested
+signal planning_requested
+signal planning_toggle_requested
 
 const CARD := preload("res://scenes/ui/components/CardSlot.tscn")
 
@@ -29,6 +31,7 @@ var manager: GameManager
 var timer_label: Label
 var debug_visible: bool = false
 var preview_enabled: bool = false
+var planning_mode: bool = false
 
 var _clock_state: Label
 var _clock_bar: ProgressBar
@@ -44,6 +47,7 @@ var _deck_status: Label
 var ai_manager: AIManager
 var _human_status: Label
 var _lane_buttons: Array[Button] = []
+var _plan_button: Button
 
 func _ready() -> void:
 	blue.configure(GameConstants.Team.BLUE, DeckArt.BLUE_PORTRAIT, false)
@@ -81,51 +85,55 @@ func bind_ai(controller: AIManager) -> void:
 
 func _build_timer() -> void:
 	ArenaStyle.decorate(timer_frame)
-	timer_label = ArenaStyle.text(timer_frame, Rect2(0, 4, 210, 50), "03:00", 41, ArenaStyle.TEXT, true, HORIZONTAL_ALIGNMENT_CENTER)
-	_clock_state = ArenaStyle.text(timer_frame, Rect2(0, 56, 210, 23), "MATCH TIME", 14, ArenaStyle.GOLD, false, HORIZONTAL_ALIGNMENT_CENTER)
+	timer_label = ArenaStyle.text(timer_frame, Rect2(0, 4, 210, 45), "03:00", 34, ArenaStyle.TEXT, true, HORIZONTAL_ALIGNMENT_CENTER)
+	_clock_state = ArenaStyle.text(timer_frame, Rect2(0, 49, 210, 23), "MATCH TIME", 11, ArenaStyle.MUTED, false, HORIZONTAL_ALIGNMENT_CENTER)
 	_clock_bar = ArenaStyle.bar(ArenaStyle.GOLD)
-	ArenaStyle.mount(timer_frame, _clock_bar, Rect2(38, 81, 134, 5))
+	ArenaStyle.mount(timer_frame, _clock_bar, Rect2(38, 77, 134, 3))
 
 func _build_deck() -> void:
 	ArenaStyle.decorate(deck)
-	var caption := ArenaStyle.text(deck, Rect2(26, 9, 375, 23), "COMMAND DECK", 16, ArenaStyle.GOLD, true)
+	var caption := ArenaStyle.text(deck, Rect2(16, 5, 300, 21), "COMMAND DECK", 12, ArenaStyle.GOLD, true)
 	caption.tooltip_text = "Fixed five-card deck; select a ready card, then a lane in Human vs AI"
-	_deck_status = ArenaStyle.text(deck, Rect2(380, 9, 253, 23), "DEPLOYMENT LOCKED", 14, ArenaStyle.MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
+	_deck_status = ArenaStyle.text(deck, Rect2(330, 5, 246, 21), "", 11, ArenaStyle.MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
 	for index in DeckArt.NAMES.size():
 		var card := CARD.instantiate() as BattleCardSlot
 		card.name = DeckArt.NAMES[index]
-		ArenaStyle.mount(deck, card, Rect2(22 + index * 124, 32, 110, 118))
+		ArenaStyle.mount(deck, card, Rect2(16 + index * 114, 29, 108, 124))
 		card.build(index, DeckArt.CARDS[index])
 		card.inspected.connect(_select_preview_card)
 		_cards.append(card)
-	ArenaStyle.text(deck, Rect2(664, 9, 150, 23), "LAST PLAY", 14, ArenaStyle.GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
-	var next := ArenaStyle.panel(deck, Rect2(695, 32, 88, 118))
-	_next_art = ArenaStyle.art(next, Rect2(4, 4, 80, 110), DeckArt.BACK)
+	ArenaStyle.text(deck, Rect2(618, 5, 130, 21), "LAST PLAY", 11, ArenaStyle.MUTED, true, HORIZONTAL_ALIGNMENT_CENTER)
+	var next := ArenaStyle.panel(deck, Rect2(641, 36, 84, 106))
+	_next_art = ArenaStyle.art(next, Rect2(4, 4, 76, 98), DeckArt.BACK)
+	_next_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_next_art.modulate = Color(0.61, 0.64, 0.72)
 	deck.move_child(energy, -1)
 
 func _build_controls() -> void:
-	var controls := ArenaStyle.panel(interface, Rect2(1438, 949, 450, 105))
+	var controls := ArenaStyle.panel(interface, Rect2(1528, 982, 360, 72))
 	controls.name = &"MatchControls"
-	ArenaStyle.text(controls, Rect2(16, 9, 415, 25), "MATCH CONTROLS", 15, ArenaStyle.GOLD, true)
+	ArenaStyle.text(controls, Rect2(12, 4, 336, 20), "MATCH CONTROLS", 11, ArenaStyle.MUTED, true)
 	_pause_button = ArenaStyle.button("Pause")
 	_pause_button.tooltip_text = "Pause or resume • Space"
-	ArenaStyle.mount(controls, _pause_button, Rect2(16, 44, 112, 46))
+	_pause_button.add_theme_font_size_override("font_size", 14)
+	ArenaStyle.mount(controls, _pause_button, Rect2(12, 28, 80, 32))
 	_pause_button.pressed.connect(pause_requested.emit)
 	var speed := ArenaStyle.button("1×")
 	speed.disabled = true
 	speed.tooltip_text = "Game speed is locked"
-	ArenaStyle.mount(controls, speed, Rect2(140, 44, 64, 46))
+	ArenaStyle.mount(controls, speed, Rect2(100, 28, 42, 32))
 	var options := ArenaStyle.button("Settings")
-	ArenaStyle.mount(controls, options, Rect2(215, 44, 111, 46))
+	options.add_theme_font_size_override("font_size", 14)
+	ArenaStyle.mount(controls, options, Rect2(150, 28, 90, 32))
 	options.pressed.connect(settings.open)
 	var debug := ArenaStyle.button("F3 Debug")
-	ArenaStyle.mount(controls, debug, Rect2(337, 44, 97, 46))
+	debug.add_theme_font_size_override("font_size", 13)
+	ArenaStyle.mount(controls, debug, Rect2(248, 28, 100, 32))
 	debug.pressed.connect(toggle_debug)
 
 func _build_deployment_controls() -> void:
-	var panel := ArenaStyle.panel(interface, Rect2(32, 600, 334, 207))
-	ArenaStyle.text(panel, Rect2(14, 8, 306, 28), "DEPLOYMENT & ANALYSIS", 17, ArenaStyle.GOLD, true)
+	var panel := ArenaStyle.panel(interface, Rect2(32, 580, 334, 227))
+	ArenaStyle.text(panel, Rect2(14, 8, 306, 24), "TACTICAL COMMAND", 13, ArenaStyle.GOLD, true)
 	for index in 3:
 		var button := ArenaStyle.button(["LEFT [A]", "RIGHT [D]", "WAIT [W]"][index])
 		button.add_theme_font_size_override("font_size", 14)
@@ -138,11 +146,15 @@ func _build_deployment_controls() -> void:
 	_human_status = ArenaStyle.text(panel, Rect2(14, 91, 306, 49), "", 15, ArenaStyle.MUTED)
 	var trace_button := ArenaStyle.button("SEARCH TREE [F2]")
 	trace_button.add_theme_font_size_override("font_size", 13)
-	ArenaStyle.mount(panel, trace_button, Rect2(14, 153, 170, 38))
+	_plan_button = ArenaStyle.button("PAUSE & PLAN [TAB]")
+	_plan_button.add_theme_font_size_override("font_size", 13)
+	ArenaStyle.mount(panel, _plan_button, Rect2(14, 143, 306, 30))
+	_plan_button.pressed.connect(planning_toggle_requested.emit)
+	ArenaStyle.mount(panel, trace_button, Rect2(14, 183, 170, 30))
 	trace_button.pressed.connect(trace_requested.emit)
 	var route_button := ArenaStyle.button("A* ROUTES [G]")
 	route_button.add_theme_font_size_override("font_size", 13)
-	ArenaStyle.mount(panel, route_button, Rect2(194, 153, 126, 38))
+	ArenaStyle.mount(panel, route_button, Rect2(194, 183, 126, 30))
 	route_button.pressed.connect(routes_requested.emit)
 
 func select_live_card(index: int) -> void:
@@ -154,6 +166,9 @@ func select_live_card(index: int) -> void:
 		for card_index in _cards.size():
 			_cards[card_index].show_selected(card_index == index)
 		_human_status.text = CardData.NAMES[index] + " selected. Choose LEFT or RIGHT."
+		planning_requested.emit()
+		if planning_mode:
+			_human_status.text = "PLANNING: %s\nClick a lane, or press A / D to confirm." % CardData.NAMES[index]
 
 func request_lane(lane: int) -> void:
 	if _selected_card >= 0 and not preview_enabled:
@@ -173,7 +188,7 @@ func _on_battle_changed() -> void:
 	var team: int = 0 if MatchConfig.is_human(0) else state.next_team
 	var shown: GameState = state.copy_state()
 	shown.next_team = team
-	var human_ready: bool = MatchConfig.is_human(0) and manager.is_running and not manager.is_paused
+	var human_ready: bool = MatchConfig.is_human(0) and manager.is_running and (not manager.is_paused or planning_mode)
 	_deck_status.text = ("YOUR DECK" if MatchConfig.is_human(0) else GameConstants.team_name(team).to_upper() + " DECK")
 	energy.set_energy(state.energy[team])
 	for index in _cards.size():
@@ -184,14 +199,18 @@ func _on_battle_changed() -> void:
 			"Select, then LEFT [A] / RIGHT [D]" if ready and human_ready else (left if not ready else "AI controls this commander"))
 	for button in _lane_buttons:
 		button.disabled = not human_ready
+	_plan_button.disabled = not MatchConfig.is_human(0) or not manager.is_running or (manager.is_paused and not planning_mode)
+	_plan_button.text = "RESUME [TAB]" if planning_mode else "PAUSE & PLAN [TAB]"
 	if MatchConfig.is_human(0):
 		var queued: String = CardData.action_name(ai_manager.queued_human_action) if ai_manager != null else "Wait"
-		_human_status.text = "Queued: %s\nCards [1-5], then A / D. W waits." % queued
+		_human_status.text = ("PLANNING: " + (CardData.NAMES[_selected_card] if _selected_card >= 0 else "choose a card") + "\nClick a lane, or A / D to confirm.") if planning_mode else "Queued: %s\nSelect a card to pause and plan." % queued
 	else:
 		_human_status.text = "Next: %s  |  %d units on field\nF2 traces  /  F7 export  /  G paths" % [GameConstants.team_name(team), state.units.size()]
 	minimap.live_units = state.units
 	minimap.refresh()
-	if manager.is_preparing:
+	if planning_mode:
+		_clock_state.text = "PLANNING • TIME FROZEN"
+	elif manager.is_preparing:
 		_clock_state.text = "PREPARING MOVE"
 	elif manager.is_running and not manager.is_paused:
 		_clock_state.text = "MATCH TIME"
@@ -201,7 +220,7 @@ func _on_decision(trace: Dictionary) -> void:
 		return
 	insight.set_trace(trace)
 	var card: int = trace.execution.action.card
-	_next_art.texture = DeckArt.CARDS[card] if card >= 0 else DeckArt.BACK
+	_next_art.texture = (TroopArt.portrait(card) if card < 3 else DeckArt.CARDS[card]) if card >= 0 else DeckArt.BACK
 	_next_art.modulate = Color.WHITE
 	if trace.team == 0 and trace.algorithm == "Human":
 		_selected_card = -1
@@ -220,6 +239,7 @@ func _build_preview_label() -> void:
 	_debug_panel.hide()
 
 func _on_match_started() -> void:
+	planning_mode = false
 	blue.update_logic(GameConstants.Team.BLUE)
 	red.update_logic(GameConstants.Team.RED)
 	insight.follow_commander(GameConstants.Team.RED if MatchConfig.is_human(0) else GameConstants.Team.BLUE)
@@ -281,10 +301,10 @@ func _refresh_commanders(immediate: bool) -> void:
 
 func _on_pause_changed(paused: bool) -> void:
 	_pause_button.text = "Resume" if paused else "Pause"
-	_clock_state.text = "PAUSED" if paused else "MATCH TIME"
+	_clock_state.text = ("PLANNING • TIME FROZEN" if planning_mode else "PAUSED") if paused else "MATCH TIME"
 	var was_paused := pause_menu.visible
-	pause_menu.visible = paused
-	if paused:
+	pause_menu.visible = paused and not planning_mode
+	if pause_menu.visible:
 		ArenaStyle.enter(pause_menu)
 	elif was_paused and manager.is_running:
 		_pause_button.grab_focus()

@@ -48,23 +48,23 @@ script = ExtResource("9_preview")
 [node name="BlueCommander" instance=ExtResource("3_commander") parent="Interface"]
 layout_mode = 0
 offset_left = 32.0
-offset_top = 26.0
-offset_right = 486.0
-offset_bottom = 148.0
+offset_top = 22.0
+offset_right = 412.0
+offset_bottom = 116.0
 
 [node name="RedCommander" instance=ExtResource("3_commander") parent="Interface"]
 layout_mode = 0
-offset_left = 1434.0
-offset_top = 26.0
+offset_left = 1508.0
+offset_top = 22.0
 offset_right = 1888.0
-offset_bottom = 148.0
+offset_bottom = 116.0
 
 [node name="TimerFrame" type="Panel" parent="Interface"]
 layout_mode = 0
 offset_left = 855.0
 offset_top = 20.0
 offset_right = 1065.0
-offset_bottom = 115.0
+offset_bottom = 108.0
 
 [node name="Minimap" instance=ExtResource("4_minimap") parent="Interface"]
 layout_mode = 0
@@ -75,24 +75,24 @@ offset_bottom = 1054.0
 
 [node name="AIInsight" instance=ExtResource("5_insight") parent="Interface"]
 layout_mode = 0
-offset_left = 1518.0
-offset_top = 221.0
+offset_left = 1584.0
+offset_top = 220.0
 offset_right = 1888.0
-offset_bottom = 681.0
+offset_bottom = 520.0
 
 [node name="CommandStrip" type="Panel" parent="Interface"]
 layout_mode = 0
-offset_left = 543.0
-offset_top = 869.0
-offset_right = 1377.0
+offset_left = 574.0
+offset_top = 876.0
+offset_right = 1346.0
 offset_bottom = 1060.0
 
 [node name="Energy" instance=ExtResource("6_energy") parent="Interface/CommandStrip"]
 layout_mode = 0
-offset_left = 25.0
-offset_top = 152.0
-offset_right = 810.0
-offset_bottom = 184.0
+offset_left = 16.0
+offset_top = 154.0
+offset_right = 756.0
+offset_bottom = 181.0
 
 [node name="PauseMenu" parent="Interface" instance=ExtResource("7_pause")]
 

@@ -70,7 +70,7 @@ func _build_help() -> void:
 	ArenaStyle.veil(_help, Color(0.014, 0.021, 0.041, 0.84))
 	var panel := ArenaStyle.panel(_help, Rect2(568, 264, 784, 552))
 	ArenaStyle.text(panel, Rect2(40, 29, 704, 70), "HOW TO PLAY", 40, ArenaStyle.GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
-	ArenaStyle.text(panel, Rect2(65, 117, 656, 151), "Destroy the enemy core to win. At timeout, compare\nremaining structure HP, then structure damage.\nHuman: choose a card [1–5], then left [A] / right [D].\nW queues Wait. Each deployment uses energy.\nMage and Arrow damage enemy units in one lane.", 21)
+	ArenaStyle.text(panel, Rect2(65, 117, 656, 174), "Destroy the enemy core to win. At timeout, compare\nremaining structure HP, then structure damage.\nHuman: select a card [1–5] to freeze time and plan.\nClick a lane, or A / D, to confirm and resume.\nTab also pauses for planning. W queues Wait.\nMage and Arrow damage enemy units in one lane.", 20)
 	ArenaStyle.text(panel, Rect2(65, 296, 656, 88), "SPACE   Pause / resume     R   Restart\nF2          Search tree           F7  Export decisions\nG            A* routes              F3  Debug damage", 20, ArenaStyle.MUTED)
 	_help_back = ArenaStyle.button("BACK", true)
 	ArenaStyle.mount(panel, _help_back, Rect2(206, 423, 372, 57))

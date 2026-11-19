@@ -22,31 +22,27 @@ var _team: int = GameConstants.Team.BLUE
 
 func _ready() -> void:
 	ArenaStyle.decorate(self, GameConstants.BLUE_COLOR)
-	_title = ArenaStyle.text(self, Rect2(22, 10, 280, 36), "AI INSIGHT · BLUE", 20, ArenaStyle.GOLD, true)
+	_title = ArenaStyle.text(self, Rect2(14, 8, 235, 27), "AI INSIGHT · BLUE", 14, ArenaStyle.GOLD, true)
 	_toggle = ArenaStyle.button("−")
 	_toggle.tooltip_text = "Collapse AI insight"
-	ArenaStyle.mount(self, _toggle, Rect2(306, 12, 42, 33))
+	ArenaStyle.mount(self, _toggle, Rect2(254, 8, 34, 28))
 	_toggle.pressed.connect(_collapse)
 	_body = Control.new()
 	_body.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ArenaStyle.mount(self, _body, Rect2(22, 52, 324, 393))
-	_status = ArenaStyle.text(_body, Rect2(0, 0, 324, 26), "", 16, GameConstants.BLUE_COLOR, true)
-	ArenaStyle.text(_body, Rect2(0, 39, 324, 24), "TACTICAL ASSESSMENT", 16, ArenaStyle.GOLD, true)
+	ArenaStyle.mount(self, _body, Rect2(14, 42, 276, 246))
+	_status = ArenaStyle.text(_body, Rect2(0, 0, 276, 24), "", 12, GameConstants.BLUE_COLOR, true)
 	for index in METRICS.size():
-		var y := 69 + index * 30
-		ArenaStyle.icon(_body, Rect2(0, y + 4, 15, 16), ICONS[index], TONES[index])
-		ArenaStyle.text(_body, Rect2(23, y, 100, 24), METRICS[index], 16, TONES[index])
+		var y := 33 + index * 25
+		ArenaStyle.text(_body, Rect2(0, y, 96, 23), METRICS[index], 13, TONES[index])
 		var bar := ArenaStyle.bar(TONES[index])
-		ArenaStyle.mount(_body, bar, Rect2(126, y + 8, 144, 9))
+		ArenaStyle.mount(_body, bar, Rect2(103, y + 9, 122, 5))
 		_bars.append(bar)
-		_values.append(ArenaStyle.text(_body, Rect2(276, y, 46, 24), "", 16, ArenaStyle.TEXT, false, HORIZONTAL_ALIGNMENT_RIGHT))
-	ArenaStyle.text(_body, Rect2(0, 166, 324, 25), "CURRENT INTENT", 16, ArenaStyle.GOLD, true)
-	_intent = ArenaStyle.text(_body, Rect2(0, 194, 324, 26), "", 17, ArenaStyle.TEXT, true)
-	ArenaStyle.text(_body, Rect2(0, 234, 324, 24), "CHOSEN ACTION", 16, ArenaStyle.GOLD, true)
-	_unit_portrait = ArenaStyle.art(_body, Rect2(0, 262, 48, 64), null)
-	_action = ArenaStyle.text(_body, Rect2(0, 265, 324, 26), "", 17, ArenaStyle.TEXT)
-	_cost = ArenaStyle.text(_body, Rect2(70, 296, 250, 24), "", 16, ArenaStyle.VIOLET)
-	_details = ArenaStyle.text(_body, Rect2(0, 332, 324, 60), "", 15, ArenaStyle.MUTED)
+		_values.append(ArenaStyle.text(_body, Rect2(230, y, 46, 23), "", 13, ArenaStyle.TEXT, false, HORIZONTAL_ALIGNMENT_RIGHT))
+	_intent = ArenaStyle.text(_body, Rect2(0, 116, 276, 25), "", 15, ArenaStyle.TEXT, true)
+	_unit_portrait = ArenaStyle.art(_body, Rect2(0, 151, 36, 44), null)
+	_action = ArenaStyle.text(_body, Rect2(0, 146, 276, 25), "", 13, ArenaStyle.TEXT)
+	_cost = ArenaStyle.text(_body, Rect2(46, 174, 230, 20), "", 12, ArenaStyle.VIOLET)
+	_details = ArenaStyle.text(_body, Rect2(0, 207, 276, 43), "", 11, ArenaStyle.MUTED)
 	set_preview(false)
 
 func set_preview(enabled: bool, tank_art: Texture2D = null) -> void:
@@ -59,8 +55,8 @@ func set_preview(enabled: bool, tank_art: Texture2D = null) -> void:
 	_intent.modulate = Color.WHITE if enabled else ArenaStyle.MUTED
 	_unit_portrait.texture = tank_art
 	_unit_portrait.visible = enabled
-	_action.position.x = 70.0 if enabled else 0.0
-	_action.size.x = 250.0 if enabled else 324.0
+	_action.position.x = 46.0 if enabled else 0.0
+	_action.size.x = 230.0 if enabled else 276.0
 	_action.text = "TANK  →  LEFT LANE" if enabled else "Waiting for first decision"
 	_cost.text = "◆  5 energy" if enabled else ""
 	_details.text = "Sample deployment for HUD review." if enabled else "Blue: %s\nRed: %s" % [MatchConfig.describe(GameConstants.Team.BLUE), MatchConfig.describe(GameConstants.Team.RED)]
@@ -90,18 +86,18 @@ func set_trace(trace: Dictionary) -> void:
 	_intent.modulate = Color.WHITE
 	var move: Dictionary = trace.execution.action
 	_action.text = CardData.action_name(move).to_upper()
-	_action.position.x = 60.0 if move.card >= 0 else 0.0
-	_action.size.x = 264.0 if move.card >= 0 else 324.0
+	_action.position.x = 46.0 if move.card >= 0 else 0.0
+	_action.size.x = 230.0 if move.card >= 0 else 276.0
 	_unit_portrait.visible = move.card >= 0
-	_unit_portrait.texture = DeckArt.CARDS[move.card] if move.card >= 0 else null
+	_unit_portrait.texture = (TroopArt.portrait(move.card) if move.card < 3 else DeckArt.CARDS[move.card]) if move.card >= 0 else null
 	_cost.text = "%d energy" % CardData.COSTS[move.card] if move.card >= 0 else "No energy spent"
-	_details.text = "%d states  /  %.1f ms CPU\n%s\nF2: tree and score details" % [trace.stats.visited, trace.stats.cpu_ms, trace.execution.status]
+	_details.text = "%d states  /  %.1f ms CPU\n%s  ·  F2 details" % [trace.stats.visited, trace.stats.cpu_ms, trace.execution.status]
 
 func _collapse() -> void:
 	_expanded = not _expanded
 	_body.visible = _expanded
 	if _expanded:
 		ArenaStyle.enter(_body)
-	size.y = 460.0 if _expanded else 57.0
+	size.y = 300.0 if _expanded else 44.0
 	_toggle.text = "−" if _expanded else "+"
 	_toggle.tooltip_text = "Collapse AI insight" if _expanded else "Expand AI insight"

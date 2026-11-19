@@ -27,7 +27,7 @@ func _ready() -> void:
 	var begin := ArenaStyle.button("ENTER BATTLE", true)
 	ArenaStyle.mount(self, begin, Rect2(1337, 950, 464, 68))
 	begin.pressed.connect(func() -> void: get_tree().change_scene_to_file(BATTLE))
-	ArenaStyle.text(self, Rect2(119, 950, 1180, 68), "Both sides use the same five cards. Units fight while deployment turns alternate.\nHuman: cards 1–5, then A / D. F2 opens the actual decision tree.", 18, ArenaStyle.MUTED)
+	ArenaStyle.text(self, Rect2(119, 950, 1180, 68), "Both sides use the same five cards. Units fight while deployment turns alternate.\nHuman: select a card to pause and plan; click a lane or A / D to confirm. Tab also pauses.", 18, ArenaStyle.MUTED)
 	_refresh()
 	begin.grab_focus()
 
@@ -79,13 +79,13 @@ func _make_commanders() -> void:
 	_commander(panel, GameConstants.Team.RED, 568, DeckArt.RED_PORTRAIT)
 	ArenaStyle.text(panel, Rect2(26, 392, 1060, 30), "Shared tactical layer:  Fuzzy Logic     •     Shared routing:  A* Pathfinding", 18, ArenaStyle.MUTED)
 
-func _commander(panel: Panel, team: int, x: int, portrait: Texture2D) -> void:
+func _commander(panel: Panel, team: int, x: int, _portrait: Texture2D) -> void:
 	var accent := GameConstants.team_color(team)
 	var prefix := GameConstants.team_name(team)
 	var card := ArenaStyle.panel(panel, Rect2(x, 66, 524, 318), accent)
 	card.name = prefix + "Commander"
 	var frame := ArenaStyle.panel(card, Rect2(12, 12, 86, 86), accent)
-	ArenaStyle.art(frame, Rect2(3, 3, 80, 80), portrait)
+	ArenaStyle.icon(frame, Rect2(22, 18, 42, 48), ArenaIcon.Kind.SHIELD, accent)
 	ArenaStyle.text(card, Rect2(112, 14, 400, 30), prefix.to_upper() + " COMMANDER", 21, accent, true)
 	var current := ArenaStyle.text(card, Rect2(112, 46, 400, 28), "", 18, ArenaStyle.TEXT, true)
 	var lock := ArenaStyle.text(card, Rect2(112, 72, 400, 24), "", 15, ArenaStyle.MUTED)
@@ -161,6 +161,7 @@ func _make_deck() -> void:
 		card.name = DeckArt.NAMES[index]
 		ArenaStyle.mount(panel, card, Rect2(x, 56, 165, 220))
 		card.build(index, DeckArt.CARDS[index])
+		card.set_display_only()
 		var accent: Color = DeckArt.ACCENTS[index]
 		ArenaStyle.text(panel, Rect2(x + 178, 74, 145, 28), DeckArt.NAMES[index].to_upper(), 19, accent, true)
 		ArenaStyle.text(panel, Rect2(x + 178, 108, 145, 24), "Cost %d" % DeckArt.COSTS[index], 17, ArenaStyle.VIOLET, true)

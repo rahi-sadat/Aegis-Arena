@@ -44,7 +44,8 @@ try {
         @{ Name = 'presentation'; Script = 'test_presentation.gd'; Pattern = 'Presentation: \d+ checks, 0 failures' },
         @{ Name = 'battle'; Script = 'test_battle.gd'; Pattern = 'Battle rules: \d+ checks, 0 failures' },
         @{ Name = 'search'; Script = 'test_search.gd'; Pattern = 'Search: \d+ checks, 0 failures' },
-        @{ Name = 'integration'; Script = 'test_integration.gd'; Pattern = 'Integration: \d+ checks, 0 failures' }
+        @{ Name = 'integration'; Script = 'test_integration.gd'; Pattern = 'Integration: \d+ checks, 0 failures' },
+        @{ Name = 'ui-refresh'; Script = 'test_presentation_polish.gd'; Pattern = 'UI refresh: \d+ checks, 0 failures' }
     )
     foreach ($check in $checks) {
         Invoke-GodotCheck -Name $check.Name -EngineArguments @('--headless', '--script', ('res://tests/' + $check.Script), '--quit-after', '20000') -Expected $check.Pattern
@@ -52,6 +53,7 @@ try {
     Invoke-GodotCheck -Name 'replay' -EngineArguments @('--headless', '--script', 'res://tests/replay_decision.gd', '--', 'res://output/evidence/mcts_forced_defense.json') -Expected 'action matches=true, score matches=true'
     if ($Rendered) {
         Invoke-GodotCheck -Name 'rendered' -EngineArguments @('--max-fps', '60', '--script', 'res://tests/test_live_capture.gd', '--quit-after', '6000') -Expected 'Rendered gameplay: \d+ checks, 0 failures; 0 missed slots'
+        Invoke-GodotCheck -Name 'ui-refresh-rendered' -EngineArguments @('--max-fps', '30', '--script', 'res://tests/test_presentation_polish.gd', '--quit-after', '6000') -Expected 'UI refresh: \d+ checks, 0 failures'
     }
     if ($PairedMatches) {
         Invoke-GodotCheck -Name 'paired-short' -EngineArguments @('--headless', '--script', 'res://tests/test_matches.gd', '--', '--pairs', '10', '--duration', '30', '--iterations', '20') -Expected 'Paired matches: 20 games, 0 failures'

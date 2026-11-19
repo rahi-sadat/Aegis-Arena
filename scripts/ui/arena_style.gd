@@ -2,15 +2,15 @@ class_name ArenaStyle
 extends RefCounted
 ## Shared typography, ornament, and interaction states for the arena UI.
 
-const GOLD := Color("#f2c76b")
-const INK := Color("#0c1627")
-const TEXT := Color("#f9efdc")
-const MUTED := Color("#b4c3d8")
+const GOLD := Color("#c8b58c")
+const INK := Color("#10161d")
+const TEXT := Color("#e9edf0")
+const MUTED := Color("#96a3af")
 const OUTLINE := Color("#060a12")
-const GLASS := Color(0.047, 0.071, 0.118, 0.9)
-const EDGE_BLUE := Color("#5b8fd8")
-const LINE := Color("#8c673c")
-const VIOLET := Color("#b88aff")
+const GLASS := Color(0.045, 0.060, 0.077, 0.96)
+const EDGE_BLUE := Color("#789cb8")
+const LINE := Color("#3b4855")
+const VIOLET := Color("#9bafcc")
 
 static var _serif: SystemFont
 
@@ -18,11 +18,11 @@ static func display_font() -> SystemFont:
 	if _serif == null:
 		_serif = SystemFont.new()
 		# Clean bold sans, matching the battle-view HUD in the design video.
-		_serif.font_names = PackedStringArray(["Segoe UI", "Helvetica Neue", "Arial", "sans-serif"])
-		_serif.font_weight = 700
+		_serif.font_names = PackedStringArray(["Segoe UI Variable Text", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"])
+		_serif.font_weight = 600
 	return _serif
 
-static func box(fill: Color, edge: Color, width: int = 1, radius: int = 7) -> StyleBoxFlat:
+static func box(fill: Color, edge: Color, width: int = 1, radius: int = 4) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = fill
 	style.border_color = edge
@@ -37,16 +37,12 @@ static func panel(parent: Node, rect: Rect2, accent: Color = GOLD) -> Panel:
 	return surface
 
 static func decorate(surface: Panel, accent: Color = GOLD) -> void:
-	var style := box(GLASS, Color(accent, 0.55), 1, 12)
-	style.shadow_color = Color(0.0, 0.0, 0.0, 0.5)
-	style.shadow_size = 12
-	style.shadow_offset = Vector2(0, 4)
+	var style := box(GLASS, Color(accent, 0.24), 1, 5)
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.30)
+	style.shadow_size = 3
+	style.shadow_offset = Vector2(0, 2)
 	surface.add_theme_stylebox_override("panel", style)
 	surface.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var trim := ArenaTrim.new()
-	trim.tint = accent
-	surface.add_child(trim)
-	trim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 static func mount(parent: Node, control: Control, rect: Rect2) -> void:
 	parent.add_child(control)
@@ -61,7 +57,7 @@ static func label(value: String, font_size: int, color: Color = TEXT, serif: boo
 	if serif:
 		line.add_theme_font_override("font", display_font())
 		line.add_theme_color_override("font_outline_color", OUTLINE)
-		line.add_theme_constant_override("outline_size", 3)
+		line.add_theme_constant_override("outline_size", 0)
 	line.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return line
@@ -82,17 +78,8 @@ static func button(value: String, primary: bool = false) -> Button:
 	return control
 
 static func _button_motion(control: Button, target: float) -> void:
-	if control.has_meta(&"motion_tween"):
-		var prior: Tween = control.get_meta(&"motion_tween")
-		if prior.is_valid():
-			prior.kill()
-	if UISettings.reduce_motion or control.disabled:
-		control.scale = Vector2.ONE
-		return
-	control.pivot_offset = control.size * 0.5
-	var tween := control.create_tween()
-	tween.tween_property(control, "scale", Vector2.ONE * target, 0.11)
-	control.set_meta(&"motion_tween", tween)
+	# Quiet colour/focus feedback replaces elastic button scaling.
+	control.scale = Vector2.ONE
 
 static func cycle_focus(controls: Array[Control]) -> void:
 	for index in controls.size():
@@ -120,29 +107,22 @@ static func format_button(control: Button, value: String, primary: bool = false)
 		control.add_theme_color_override(state, ink)
 	control.add_theme_color_override("font_disabled_color", Color("#7f8899"))
 	if primary:
-		control.add_theme_stylebox_override("normal", glass(Color("#e2ab48"), Color("#ffe3a3"), Color("#e2ab48")))
-		control.add_theme_stylebox_override("hover", glass(Color("#f0bd5c"), Color("#fff0c8"), Color("#ffd27a")))
-		control.add_theme_stylebox_override("pressed", glass(Color("#c88f33"), Color("#ffe3a3"), Color("#e2ab48")))
+		control.add_theme_stylebox_override("normal", glass(Color("#bca982"), Color("#cbb996")))
+		control.add_theme_stylebox_override("hover", glass(Color("#cdbb98"), Color("#e1d2b5")))
+		control.add_theme_stylebox_override("pressed", glass(Color("#a18d67"), Color("#cbb996")))
 	else:
-		control.add_theme_stylebox_override("normal", glass(Color("#152238"), Color(EDGE_BLUE, 0.55)))
-		control.add_theme_stylebox_override("hover", glass(Color("#1d3050"), Color(EDGE_BLUE, 0.95), EDGE_BLUE))
-		control.add_theme_stylebox_override("pressed", glass(Color("#101a2b"), EDGE_BLUE))
+		control.add_theme_stylebox_override("normal", glass(Color("#18222d"), Color("#394957")))
+		control.add_theme_stylebox_override("hover", glass(Color("#243443"), Color(EDGE_BLUE, 0.8)))
+		control.add_theme_stylebox_override("pressed", glass(Color("#101820"), EDGE_BLUE))
 	control.add_theme_stylebox_override("disabled", glass(Color(0.08, 0.1, 0.15, 0.85), Color(1, 1, 1, 0.1)))
-	var focus := box(Color.TRANSPARENT, Color("#ffe6a8"), 2, 10)
-	focus.set_expand_margin_all(3)
+	var focus := box(Color.TRANSPARENT, EDGE_BLUE, 1, 4)
+	focus.set_expand_margin_all(2)
 	control.add_theme_stylebox_override("focus", focus)
 
 ## Dark-glass button face with a thin luminous edge and an optional outer glow.
 static func glass(fill: Color, edge: Color, glow: Color = Color.TRANSPARENT) -> StyleBoxFlat:
-	var style := box(fill, edge, 1, 10)
-	style.border_width_top = 2
-	if glow.a > 0.0:
-		style.shadow_color = Color(glow, 0.45)
-		style.shadow_size = 8
-	else:
-		style.shadow_color = Color(0, 0, 0, 0.35)
-		style.shadow_size = 4
-		style.shadow_offset = Vector2(0, 2)
+	var style := box(fill, edge, 1, 4)
+	style.shadow_size = 0
 	return style
 
 ## Makes a toggle button read as "chosen" when pressed: team-coloured glow and edge.
@@ -152,8 +132,8 @@ static func selectable(control: Button, accent: Color = GOLD) -> void:
 	control.add_theme_color_override("font_hover_color", TEXT)
 	control.add_theme_stylebox_override("normal", glass(Color("#131c2c"), Color(1, 1, 1, 0.14)))
 	control.add_theme_stylebox_override("hover", glass(Color("#1a2638"), Color(accent, 0.7)))
-	var chosen := glass(accent.darkened(0.45), accent.lightened(0.3), accent)
-	chosen.set_border_width_all(2)
+	var chosen := glass(Color("#2a3b4b"), Color(accent, 0.8))
+	chosen.set_border_width_all(1)
 	control.add_theme_stylebox_override("pressed", chosen)
 	control.add_theme_stylebox_override("hover_pressed", chosen)
 	control.add_theme_color_override("font_pressed_color", Color.WHITE)
@@ -165,8 +145,8 @@ static func bar(accent: Color) -> ProgressBar:
 	meter.max_value = 1.0
 	meter.step = 0.0
 	meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	meter.add_theme_stylebox_override("background", box(Color("#070b14"), OUTLINE, 2, 6))
-	meter.add_theme_stylebox_override("fill", box(accent, accent.darkened(0.35), 2, 6))
+	meter.add_theme_stylebox_override("background", box(Color("#070c12"), Color.TRANSPARENT, 0, 1))
+	meter.add_theme_stylebox_override("fill", box(accent, Color.TRANSPARENT, 0, 1))
 	return meter
 
 static func art(parent: Node, rect: Rect2, texture: Texture2D) -> TextureRect:
