@@ -1,116 +1,106 @@
-# Phase 1 architecture
+# Architecture of the playable battle
 
-## Screen flow and battle scene
+## Scene and ownership
 
-`TitleScreen.tscn` is the startup scene. Play and Game Modes open
-`PreBattleScreen.tscn`, which launches `Main.tscn` for the Phase 1 match.
-The pause and result screens return to the title.
+`TitleScreen.tscn` opens `PreBattleScreen.tscn`, then `Main.tscn`.
+`scripts/core/main.gd` wires the existing arena, six tower Nodes, manager, and HUD
+to a small `AIManager`, a `LiveBattleView`, and a read-only `SearchTreeView`.
 
 ```text
-Main (Node; scripts/core/main.gd)
-|-- GameManager (Node)
-|-- Arena (Node2D; Arena.tscn)
-|-- Structures (Node2D)
-|   |-- BlueLeftGuard  (GuardTower.tscn)
-|   |-- BlueRightGuard (GuardTower.tscn)
-|   |-- BlueCore       (CoreTower.tscn)
-|   |-- RedLeftGuard   (GuardTower.tscn)
-|   |-- RedRightGuard  (GuardTower.tscn)
-|   `-- RedCore        (CoreTower.tscn)
-`-- HUD (CanvasLayer; HUD.tscn)
-    `-- Interface (Control)
-        |-- BoardVignette and BattlePreview
-        |-- BlueCommander, TimerFrame, RedCommander
-        |-- Minimap and AIInsight
-        |-- CommandStrip
-        |   |-- Fighter, Ranger, Tank, Mage, Arrow
-        |   `-- Energy
-        |-- MatchControls, PreviewBadge, DebugDamage
-        |-- PauseMenu
-        |-- MatchResultPanel
-        `-- SettingsPanel
+Main
+  GameManager       authoritative numeric GameState and match lifetime
+  Arena             static artwork
+  Structures        six tower views; HP changes synchronize from GameState
+  HUD               presentation, requests, overlays, tree viewer
+  LiveBattle        draws actual units/attacks and optional A* overlays
+  AIManager         alternating slots, copied roots, selected search, execution
 ```
 
-Each reusable tower scene contains a `TowerArt` sprite and `Title` and `Health`
-labels. It draws its HP bar and changes from the team tower sprite to a ruin
-on destruction. `Main` runs after its children are ready,
-wires HUD requests, gathers the six structures, and starts the match. Restart
-reuses the existing scene instances and reconnects each signal once.
+The manager owns one numeric `GameState`. Structures and units in the search
+state are dictionaries of numbers/identifiers, not Nodes. The tower Nodes keep
+their original damage/destruction notifications for the HUD; synchronization is
+guarded so it never counts numeric damage twice.
 
-## Current script responsibilities
+## One rules implementation for live play and prediction
 
-| Script | Responsibility |
-| --- | --- |
-| `core/main.gd` | Scene wiring, keyboard shortcuts, restart, routing debug requests |
-| `core/game_manager.gd` | Timer, pause, match lifetime, damage attribution, result signals |
-| `core/match_rules.gd` | Pure numeric percentage, damage tie-break, and draw calculation |
-| `core/game_constants.gd` | Team/result identifiers, team names, team colors |
-| `core/match_config.gd` | Battle-setup choices: mode, per-commander algorithm, depth/iterations |
-| `core/game_balance.gd` | Resource schema for match duration and debug damage amount |
-| `combat/structure_data.gd` | Resource schema for tower type, name, and starting HP |
-| `combat/structure.gd` | Live HP, damage clamping, destruction, reset, tower presentation |
-| `arena/arena.gd` | Painted arena and layers for banners and braziers |
-| `ui/hud.gd` | Live HUD presentation and user-request signals |
-| `ui/match_result_panel.gd` | Final result presentation and restart request |
-| `ui/components/` | Commander panels, minimap, card slots, energy, insight, and overlays |
-| `ui/title_screen.gd`, `ui/pre_battle_screen.gd` | Menus and scene navigation |
-| `tests/test_phase_one.gd` | Headless integration and numeric victory-rule checks |
-| `tests/test_presentation.gd` | Screen flow, live HUD, preview isolation, and optional render capture |
+`BattleRules.apply_action()` validates and applies one deployment or spell.
+`BattleRules.advance_tick()` advances 0.05 seconds of energy, cooldowns, movement,
+attacks, damage, deaths, and time. Damage from the tick's attacks is applied as a
+batch, allowing simultaneous core destruction to draw. Both the live manager and
+the planners call these functions.
 
-No global/autoload singleton is needed. Ordinary operations are local calls.
-Structures emit `damaged` and `destroyed`; the manager observes these and emits
-`structure_health_changed`, `timer_changed`, `pause_changed`, `match_started`,
-and `match_ended`. The HUD observes those signals and emits pause, restart,
-and damage requests. It cannot decide or change a winner itself.
+`SearchHelpers.result()` deep-copies a state, applies a legal action, runs fifteen
+ticks, and switches the actor. The original state, sibling branches, shared card
+definitions, and visible game never change. A terminal result interrupts the
+interval. `MatchRules` retains the original timeout calculation.
 
-The manager freezes its own clock rather than pausing the entire SceneTree,
-so UI controls remain usable. Future live gameplay systems must honor the
-manager's pause and terminal state. There are no live combat systems yet.
+Each unit has a lane and numeric distance along that lane's static route.
+`ArenaGrid` builds those routes with `ManualAStar` on a four-neighbor grid with
+blocked river cells and tower footprints. Fixed spawn points and static obstacles
+allow sharing these cached routes. Search reads distances and never reruns A*.
+The view converts the same numeric distance to a world position. Small formation
+offsets are visual only; units are not moving grid obstacles.
 
-The minimap projects actual tower positions onto board geometry from
-`ArenaLayout`. F4 in debug builds toggles presentation samples in `BattlePreview`,
-the deck, energy, and AI Insight. Preview illustrations, projectile effects, and
-sample values have no write path to the manager or the structures.
+## Alternating deployment scheduler
 
-## Shared data
+The first Blue decision is prepared before the match clock starts. On completion,
+one action executes at time zero. The manager discards excess startup-frame time
+so initial rendering/shader work cannot consume Red's first planning window.
 
-`data/balance/game_balance.tres` defines the 180-second match and debug damage.
-`data/structures/*.tres` define 500-HP guards and 800-HP cores. These shared
-definitions are read-only at runtime; per-instance current HP lives on each
-structure. Changing a resource in the Inspector changes the next match's
-settings without editing rule scripts. Team starting HP totals are recorded
-when the match starts and remain the timeout denominator.
+After a deployment, `AIManager` switches the next actor and predicts fifteen
+ticks on a copy. It starts that actor's search while the live manager runs the
+same fifteen ticks. At the next 0.75-second slot it checks snapshot agreement,
+legality, and completion before executing exactly one action.
 
-## Planned boundary: visible game and AI simulation
+Minimax/alpha-beta yield to Godot when a chunk uses roughly 12 ms of CPU. MCTS
+yields between trials after roughly 25 ms of work. No worker threads or global
+event bus are used. Pausing
+freezes numeric ticks and deployment slots; a search may finish its copied work
+and wait. Restart/exit cancels outstanding work using a generation number and
+the agent's cancellation flag. Debug damage invalidates and rebuilds the next
+prediction. A late or stale result executes a labeled Wait, never a fake
+completed search.
 
-The current visible game uses Godot Nodes for structures, presentation, and
-frame time. Later live units will also use Nodes. **Future search must not
-operate on those Nodes.** A planner exploring a hypothetical attack must not
-damage a visible tower, spawn visible units, mutate shared resources, or
-advance the actual match clock.
+Human Blue queues one action for its next slot. The last queued action replaces
+the previous choice. An empty queue produces Wait. The human uses the same
+legality and execution functions as the agents.
 
-Phase 4 will add data-only `GameState`, `UnitState`, `StructureState`,
-`GameAction`, and a `StateBuilder` that snapshots live values. The later forward
-model will copy these states and simulate numeric lane progress for one planner
-interval using the same shared balance definitions as the visible game. It
-will not instantiate scenes, animations, or projectiles. State-copy isolation
-and forward-model behavior must be tested before search agents are introduced.
+## Search and assessment
 
-The planned responsibilities are distinct: fuzzy logic assesses the battle;
-Minimax/MCTS select legal high-level deployments; alpha-beta reduces Minimax
-search; manual A* navigates live units around the arena grid. Live A* routes
-must not be computed for every search state. Planner scheduling must leave
-movement and combat running between decisions.
+`TacticalFuzzy` implements nine zero-order Sugeno rules. It freezes T/U/E/P
+weights for one root search. `BattleEvaluation` scores feature differences from
+that root team's perspective. Terminal results override the heuristic.
 
-## Reserved directories and development order
+`MinimaxAgent` contains explicit MAX and MIN recursion. `AlphaBetaAgent` uses
+the same actions, scoring, horizon, and tie rule with alpha/beta cutoffs.
+`MCTSAgent` contains a small node and separate selection, expansion, simulation,
+and backpropagation functions. Its rewards remain root-relative; opponent
+selection uses `(1-Q)+exploration`.
 
-Future unit scenes/data, state, movement, AI subdirectories, debug tooling,
-and assets are represented only by `.gitkeep` files. No empty algorithm scripts,
-fake AI choices, or search stubs are present. `AIManager`, `Units`, AI status,
-event-bus, and experiment logger nodes/scripts will be added when needed.
+The live defaults are depth 2 and 20 MCTS trials, with six total plies per trial.
+The menu exposes depth 1-2 and 10-30 trials. The standalone agent APIs support
+larger budgets for experiments. These limits came from profiling, not a change
+to the definitions of the algorithms.
 
-Next is Phase 2 (energy and manually triggered unit battles), then Phase 3
-(grid and manual A*), Phase 4 (copyable state and simulation), Phase 5 (baseline
-AI), Phase 6 (fuzzy assessment), Phase 7 (plain Minimax then alpha-beta),
-Phase 8 (MCTS), Phase 9 (CSV logging), and Phase 10 (presentation/debug polish).
-Advanced AI and experiment-design documents belong to those later stages.
+## UI and evidence
+
+`HUD` reads live values and emits requests. AI-vs-AI cards are observational;
+human cards unlock when ready. `AIInsightPanel` receives actual decision traces.
+F4's `BattlePreview` remains isolated from deployment requests and numeric state.
+
+`DecisionTrace` stores plain dictionaries. It records root snapshots, legal
+actions, fuzzy calculations, tree nodes and bounds, completed budgets, CPU/wall
+time, and execution status. MCTS also records early/late iterations including
+UCT candidates, rollouts, rewards, and backup changes. JSON uses full float
+precision so decisions can be replayed.
+
+The controller retains twelve decisions per team. F2 freezes one recorded
+decision in the viewer, defaults to a recent branching decision, and offers a
+history/branch selector and clickable leaf calculations. The view displays two
+plies; JSON includes every recorded node, up to an explicitly marked 500-node
+limit. Unvisited pruned edges never receive invented scores.
+
+F7 exports the latest team decisions, the currently selected historical
+decision, and A* grid/path/examined-cell data. A compact CSV logs every executed
+slot. Project runs write `output/evidence/`; exported games use
+`user://evidence`. Generated evidence and runtime caches are ignored by Git.

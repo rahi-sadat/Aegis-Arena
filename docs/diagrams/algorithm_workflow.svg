@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="490" height="308" preserveAspectRatio="xMinYMin meet" viewBox="0 0 490 308" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="490" height="308"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-308)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="24.0" y="260.0" width="442.0" height="38.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="163.9955" y="282" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,564) scale(1,-1)">NUMERIC STATE AT THE NEXT SLOT</text>
+			<text x="163.192" y="269" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,538) scale(1,-1)">Towers, units, energy, cooldowns, clock, actor</text>
+			<path d="M 245,264 L 245,249 Z" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="241 253, 249 253, 245 248" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(12%,36%,60%); fill-rule: evenodd;"/>
+			<rect x="24.0" y="211.0" width="442.0" height="38.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="160.3595" y="233" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,466) scale(1,-1)">FUZZY ASSESSMENT + LEGAL MOVES</text>
+			<text x="155.41199999999998" y="220" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,440) scale(1,-1)">Freeze weights; retain every legal move and WAIT</text>
+			<path d="M 245,215 L 245,200 Z" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="241 204, 249 204, 245 199" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(12%,36%,60%); fill-rule: evenodd;"/>
+			<rect x="24.0" y="162.0" width="442.0" height="38.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="183.746" y="184" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,368) scale(1,-1)">SELECTED SEARCH AGENT</text>
+			<text x="146.96800000000002" y="171" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,342) scale(1,-1)">Minimax, alpha-beta, or MCTS explores isolated copies</text>
+			<path d="M 245,166 L 245,151 Z" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="241 155, 249 155, 245 150" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(12%,36%,60%); fill-rule: evenodd;"/>
+			<rect x="24.0" y="113.0" width="442.0" height="38.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="189.749" y="135" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,270) scale(1,-1)">ONE VALIDATED ACTION</text>
+			<text x="150.284" y="122" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,244) scale(1,-1)">Execute once; record the decision and its explanation</text>
+			<path d="M 245,117 L 245,102 Z" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="241 106, 249 106, 245 101" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(12%,36%,60%); fill-rule: evenodd;"/>
+			<rect x="24.0" y="64.0" width="442.0" height="38.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="182.999" y="86" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,172) scale(1,-1)">LIVE ROUTING AND BATTLE</text>
+			<text x="139.404" y="73" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,146) scale(1,-1)">A* for units; shared numeric ticks for movement and attacks</text>
+			<path d="M 245,68 L 245,53 Z" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 1;"/>
+			<polygon points="241 57, 249 57, 245 52" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(12%,36%,60%); fill-rule: evenodd;"/>
+			<rect x="24.0" y="15.0" width="442.0" height="38.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="201.503" y="37" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,74) scale(1,-1)">NEXT COMMANDER</text>
+			<text x="153.624" y="24" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,48) scale(1,-1)">Combat runs between alternating 0.75-second slots</text>
+		</g>
+	</g>
+</svg>

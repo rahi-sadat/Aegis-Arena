@@ -6,6 +6,7 @@ var _map: Control
 var _toggle: Button
 var _expanded: bool = true
 var _preview: bool = false
+var live_units: Array = []
 
 func _ready() -> void:
 	ArenaStyle.decorate(self)
@@ -64,3 +65,6 @@ func _draw_field() -> void:
 	if _preview:
 		for index in BattlePreview.UNIT_POINTS.size():
 			_map.draw_circle(_point(BattlePreview.UNIT_POINTS[index]), 2.4, BattlePreview.unit_color(index), true, -1.0, true)
+	else:
+		for unit: Dictionary in live_units:
+			_map.draw_circle(_point(ArenaGrid.position_at(unit.lane, unit.progress)), 2.5, GameConstants.team_color(unit.team), true, -1.0, true)

@@ -1,6 +1,6 @@
 class_name StructureData
 extends Resource
-## Shared structure definition. Combat statistics will be added in Phase 2.
+## Shared tower kind, name, and HP. Numeric attacks run in BattleRules.
 
 enum Kind { GUARD, CORE }
 

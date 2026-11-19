@@ -8,6 +8,7 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	MatchConfig.autoplay_enabled = false
 	var scene: PackedScene = load("res://scenes/main/Main.tscn")
 	_check(scene != null, "Main scene loads")
 	if scene == null:

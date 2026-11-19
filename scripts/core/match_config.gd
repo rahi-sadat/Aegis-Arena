@@ -1,7 +1,7 @@
 class_name MatchConfig
 extends RefCounted
 ## Battle-setup choices that carry from the pre-battle screen into the match.
-## The search algorithms read their commander's entry when they are implemented.
+## AIManager reads each commander's algorithm and tested live search budget.
 
 enum Mode { AI_VS_AI, HUMAN_VS_AI }
 enum Algorithm { MINIMAX, ALPHA_BETA, MCTS }
@@ -15,13 +15,17 @@ const ALGORITHM_NOTES := [
 ]
 const MODE_NAMES := ["AI vs AI", "Human vs AI"]
 
-const DEPTH_RANGE := Vector2i(1, 6)
+const DEPTH_RANGE := Vector2i(1, 2)
 const DEPTH_STEP := 1
-const ITERATION_RANGE := Vector2i(100, 2000)
-const ITERATION_STEP := 100
-const DEFAULT_DEPTH := 3
-const DEFAULT_ITERATIONS := 300
+const ITERATION_RANGE := Vector2i(10, 30)
+const ITERATION_STEP := 10
+const DEFAULT_DEPTH := 2
+const DEFAULT_ITERATIONS := 20
 const DECISION_INTERVAL_SECONDS := 0.75
+
+## Tests turn autoplay off before loading a scene to examine rules in isolation.
+static var autoplay_enabled: bool = true
+static var random_seed: int = 2026
 
 static var mode: Mode = Mode.AI_VS_AI
 ## Indexed by GameConstants.Team. Defaults follow the design: Blue α–β, Red MCTS.

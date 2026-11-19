@@ -11,5 +11,6 @@ __pycache__/
 .venv/
 build/
 dist/
+output/evidence/
 .DS_Store
 Thumbs.db

@@ -28,6 +28,9 @@ func configure(team_id: int, artwork: Texture2D, mirrored: bool) -> void:
 	badge.name = &"LogicBadge"
 	ArenaStyle.icon(badge, Rect2(size.x - 34 if mirrored else 14, 9, 18, 18), ArenaIcon.Kind.CRYSTAL, accent)
 	logic_label = ArenaStyle.text(badge, Rect2(14 if mirrored else 42, 0, size.x - 56, 36), "", 16, ArenaStyle.TEXT, true, alignment)
+	update_logic(team_id)
+
+func update_logic(team_id: int) -> void:
 	logic_label.text = ("YOU  ·  " if MatchConfig.is_human(team_id) else "AI  ·  ") + MatchConfig.describe(team_id)
 
 func update_status(core: ArenaStructure, fraction: float, immediate: bool) -> void:

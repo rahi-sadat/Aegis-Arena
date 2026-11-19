@@ -51,7 +51,7 @@ func _ready() -> void:
 
 func set_preview(enabled: bool, tank_art: Texture2D = null) -> void:
 	var algorithm: String = MatchConfig.ALGORITHM_SHORT[MatchConfig.algorithms[_team]]
-	_status.text = "SAMPLE ASSESSMENT" if enabled else algorithm + "  ·  AWAITING UNITS"
+	_status.text = "SAMPLE ASSESSMENT" if enabled else algorithm + "  ·  PREPARING DECISION"
 	for index in _bars.size():
 		_bars[index].value = SAMPLE[index] if enabled else 0.0
 		_values[index].text = "%.2f" % SAMPLE[index] if enabled else "—"
@@ -61,7 +61,7 @@ func set_preview(enabled: bool, tank_art: Texture2D = null) -> void:
 	_unit_portrait.visible = enabled
 	_action.position.x = 70.0 if enabled else 0.0
 	_action.size.x = 250.0 if enabled else 324.0
-	_action.text = "TANK  →  LEFT LANE" if enabled else "Awaiting commander logic"
+	_action.text = "TANK  →  LEFT LANE" if enabled else "Waiting for first decision"
 	_cost.text = "◆  5 energy" if enabled else ""
 	_details.text = "Sample deployment for HUD review." if enabled else "Blue: %s\nRed: %s" % [MatchConfig.describe(GameConstants.Team.BLUE), MatchConfig.describe(GameConstants.Team.RED)]
 
@@ -71,6 +71,31 @@ func follow_commander(team: int) -> void:
 	_title.text = "AI INSIGHT · " + GameConstants.team_name(team).to_upper()
 	_status.add_theme_color_override("font_color", GameConstants.team_color(team))
 	set_preview(false)
+
+func set_trace(trace: Dictionary) -> void:
+	if trace.team != _team:
+		return
+	var assessment: Dictionary = trace.assessment
+	var inputs: Dictionary = assessment.inputs
+	var values: Array = [inputs.threat, inputs.opportunity, inputs.energy]
+	for index in 3:
+		_bars[index].value = values[index]
+		_values[index].text = "%.2f" % values[index]
+	_status.text = trace.algorithm.to_upper()
+	var outputs: Dictionary = assessment.outputs
+	var intent: String = "ATTACK" if outputs.attack >= outputs.defend and outputs.attack >= outputs.save else ("DEFEND" if outputs.defend >= outputs.save else "SAVE ENERGY")
+	if maxf(outputs.attack, maxf(outputs.defend, outputs.save)) <= BattleRules.EPSILON:
+		intent = "BALANCED"
+	_intent.text = intent
+	_intent.modulate = Color.WHITE
+	var move: Dictionary = trace.execution.action
+	_action.text = CardData.action_name(move).to_upper()
+	_action.position.x = 60.0 if move.card >= 0 else 0.0
+	_action.size.x = 264.0 if move.card >= 0 else 324.0
+	_unit_portrait.visible = move.card >= 0
+	_unit_portrait.texture = DeckArt.CARDS[move.card] if move.card >= 0 else null
+	_cost.text = "%d energy" % CardData.COSTS[move.card] if move.card >= 0 else "No energy spent"
+	_details.text = "%d states  /  %.1f ms CPU\n%s\nF2: tree and score details" % [trace.stats.visited, trace.stats.cpu_ms, trace.execution.status]
 
 func _collapse() -> void:
 	_expanded = not _expanded

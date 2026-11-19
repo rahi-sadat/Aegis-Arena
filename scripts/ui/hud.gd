@@ -6,6 +6,9 @@ signal pause_requested
 signal restart_requested
 signal damage_requested(structure_id: StringName)
 signal title_requested
+signal deployment_requested(move: Dictionary)
+signal trace_requested
+signal routes_requested
 
 const CARD := preload("res://scenes/ui/components/CardSlot.tscn")
 
@@ -38,6 +41,9 @@ var _debug_rows: Dictionary = {}
 var _cores: Array[ArenaStructure] = [null, null]
 var _next_art: TextureRect
 var _deck_status: Label
+var ai_manager: AIManager
+var _human_status: Label
+var _lane_buttons: Array[Button] = []
 
 func _ready() -> void:
 	blue.configure(GameConstants.Team.BLUE, DeckArt.BLUE_PORTRAIT, false)
@@ -47,6 +53,7 @@ func _ready() -> void:
 	_build_deck()
 	_build_controls()
 	_build_preview_label()
+	_build_deployment_controls()
 	minimap.visible = UISettings.minimap_visible
 	settings.minimap_changed.connect(func(enabled: bool) -> void: minimap.visible = enabled)
 	pause_menu.resume_requested.connect(pause_requested.emit)
@@ -65,6 +72,12 @@ func bind_match(game_manager: GameManager) -> void:
 	manager.timer_changed.connect(_on_timer_changed)
 	manager.structure_health_changed.connect(_on_structure_changed)
 	manager.pause_changed.connect(_on_pause_changed)
+	manager.battle_changed.connect(_on_battle_changed)
+
+func bind_ai(controller: AIManager) -> void:
+	ai_manager = controller
+	ai_manager.decision_made.connect(_on_decision)
+	ai_manager.human_action_queued.connect(func(_move: Dictionary) -> void: _on_battle_changed())
 
 func _build_timer() -> void:
 	ArenaStyle.decorate(timer_frame)
@@ -76,7 +89,7 @@ func _build_timer() -> void:
 func _build_deck() -> void:
 	ArenaStyle.decorate(deck)
 	var caption := ArenaStyle.text(deck, Rect2(26, 9, 375, 23), "COMMAND DECK", 16, ArenaStyle.GOLD, true)
-	caption.tooltip_text = "Illustrated card lineup for Phase 2 and later"
+	caption.tooltip_text = "Fixed five-card deck; select a ready card, then a lane in Human vs AI"
 	_deck_status = ArenaStyle.text(deck, Rect2(380, 9, 253, 23), "DEPLOYMENT LOCKED", 14, ArenaStyle.MUTED, false, HORIZONTAL_ALIGNMENT_RIGHT)
 	for index in DeckArt.NAMES.size():
 		var card := CARD.instantiate() as BattleCardSlot
@@ -85,7 +98,7 @@ func _build_deck() -> void:
 		card.build(index, DeckArt.CARDS[index])
 		card.inspected.connect(_select_preview_card)
 		_cards.append(card)
-	ArenaStyle.text(deck, Rect2(664, 9, 150, 23), "NEXT", 14, ArenaStyle.GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
+	ArenaStyle.text(deck, Rect2(664, 9, 150, 23), "LAST PLAY", 14, ArenaStyle.GOLD, true, HORIZONTAL_ALIGNMENT_CENTER)
 	var next := ArenaStyle.panel(deck, Rect2(695, 32, 88, 118))
 	_next_art = ArenaStyle.art(next, Rect2(4, 4, 80, 110), DeckArt.BACK)
 	_next_art.modulate = Color(0.61, 0.64, 0.72)
@@ -110,6 +123,92 @@ func _build_controls() -> void:
 	ArenaStyle.mount(controls, debug, Rect2(337, 44, 97, 46))
 	debug.pressed.connect(toggle_debug)
 
+func _build_deployment_controls() -> void:
+	var panel := ArenaStyle.panel(interface, Rect2(32, 600, 334, 207))
+	ArenaStyle.text(panel, Rect2(14, 8, 306, 28), "DEPLOYMENT & ANALYSIS", 17, ArenaStyle.GOLD, true)
+	for index in 3:
+		var button := ArenaStyle.button(["LEFT [A]", "RIGHT [D]", "WAIT [W]"][index])
+		button.add_theme_font_size_override("font_size", 14)
+		ArenaStyle.mount(panel, button, Rect2(14 + index * 104, 44, 98, 38))
+		if index < 2:
+			button.pressed.connect(request_lane.bind(index))
+		else:
+			button.pressed.connect(request_wait)
+		_lane_buttons.append(button)
+	_human_status = ArenaStyle.text(panel, Rect2(14, 91, 306, 49), "", 15, ArenaStyle.MUTED)
+	var trace_button := ArenaStyle.button("SEARCH TREE [F2]")
+	trace_button.add_theme_font_size_override("font_size", 13)
+	ArenaStyle.mount(panel, trace_button, Rect2(14, 153, 170, 38))
+	trace_button.pressed.connect(trace_requested.emit)
+	var route_button := ArenaStyle.button("A* ROUTES [G]")
+	route_button.add_theme_font_size_override("font_size", 13)
+	ArenaStyle.mount(panel, route_button, Rect2(194, 153, 126, 38))
+	route_button.pressed.connect(routes_requested.emit)
+
+func select_live_card(index: int) -> void:
+	if preview_enabled:
+		_select_preview_card(index)
+		return
+	if index >= 0 and index < _cards.size() and not _cards[index].disabled:
+		_selected_card = index
+		for card_index in _cards.size():
+			_cards[card_index].show_selected(card_index == index)
+		_human_status.text = CardData.NAMES[index] + " selected. Choose LEFT or RIGHT."
+
+func request_lane(lane: int) -> void:
+	if _selected_card >= 0 and not preview_enabled:
+		deployment_requested.emit(CardData.action(_selected_card, lane))
+
+func request_wait() -> void:
+	if not preview_enabled:
+		deployment_requested.emit(CardData.wait_action())
+
+func show_message(message: String) -> void:
+	_human_status.text = message
+
+func _on_battle_changed() -> void:
+	if manager == null or manager.battle_state == null or preview_enabled:
+		return
+	var state: GameState = manager.battle_state
+	var team: int = 0 if MatchConfig.is_human(0) else state.next_team
+	var shown: GameState = state.copy_state()
+	shown.next_team = team
+	var human_ready: bool = MatchConfig.is_human(0) and manager.is_running and not manager.is_paused
+	_deck_status.text = ("YOUR DECK" if MatchConfig.is_human(0) else GameConstants.team_name(team).to_upper() + " DECK")
+	energy.set_energy(state.energy[team])
+	for index in _cards.size():
+		var left: String = BattleRules.rejection_reason(shown, CardData.action(index, 0))
+		var right: String = BattleRules.rejection_reason(shown, CardData.action(index, 1))
+		var ready: bool = left.is_empty() or right.is_empty()
+		_cards[index].set_live(human_ready and ready, state.cooldowns[team][index],
+			"Select, then LEFT [A] / RIGHT [D]" if ready and human_ready else (left if not ready else "AI controls this commander"))
+	for button in _lane_buttons:
+		button.disabled = not human_ready
+	if MatchConfig.is_human(0):
+		var queued: String = CardData.action_name(ai_manager.queued_human_action) if ai_manager != null else "Wait"
+		_human_status.text = "Queued: %s\nCards [1-5], then A / D. W waits." % queued
+	else:
+		_human_status.text = "Next: %s  |  %d units on field\nF2 traces  /  F7 export  /  G paths" % [GameConstants.team_name(team), state.units.size()]
+	minimap.live_units = state.units
+	minimap.refresh()
+	if manager.is_preparing:
+		_clock_state.text = "PREPARING MOVE"
+	elif manager.is_running and not manager.is_paused:
+		_clock_state.text = "MATCH TIME"
+
+func _on_decision(trace: Dictionary) -> void:
+	if preview_enabled:
+		return
+	insight.set_trace(trace)
+	var card: int = trace.execution.action.card
+	_next_art.texture = DeckArt.CARDS[card] if card >= 0 else DeckArt.BACK
+	_next_art.modulate = Color.WHITE
+	if trace.team == 0 and trace.algorithm == "Human":
+		_selected_card = -1
+		for slot in _cards:
+			slot.show_selected(false)
+	_on_battle_changed()
+
 func _build_preview_label() -> void:
 	_preview_label = ArenaStyle.panel(interface, Rect2(32, 200, 545, 42), ArenaStyle.VIOLET)
 	_preview_label.name = &"PreviewBadge"
@@ -121,6 +220,9 @@ func _build_preview_label() -> void:
 	_debug_panel.hide()
 
 func _on_match_started() -> void:
+	blue.update_logic(GameConstants.Team.BLUE)
+	red.update_logic(GameConstants.Team.RED)
+	insight.follow_commander(GameConstants.Team.RED if MatchConfig.is_human(0) else GameConstants.Team.BLUE)
 	result_panel.hide()
 	pause_menu.hide()
 	settings.hide()
@@ -148,6 +250,9 @@ func _on_match_started() -> void:
 	_refresh_commanders(true)
 	_pause_button.disabled = false
 	_clock_state.text = "MATCH TIME"
+	_selected_card = -1
+	for card in _cards:
+		card.show_selected(false)
 
 func _request_damage(structure_id: StringName) -> void:
 	damage_requested.emit(structure_id)
@@ -224,9 +329,23 @@ func toggle_preview() -> void:
 	_next_art.modulate = Color.WHITE if preview_enabled else Color(0.61, 0.64, 0.72)
 	for card in _cards:
 		card.set_interaction(preview_enabled)
+		if preview_enabled:
+			card.set_live(true, 0.0, "Preview inspection only")
 	_select_preview_card(2 if preview_enabled else -1)
+	if not preview_enabled:
+		_selected_card = -1
+		for card in _cards:
+			card.show_selected(false)
+		_on_battle_changed()
+		if ai_manager != null:
+			for trace: Dictionary in ai_manager.last_traces:
+				if not trace.is_empty():
+					insight.set_trace(trace)
 
 func _select_preview_card(index: int) -> void:
+	if not preview_enabled:
+		select_live_card(index)
+		return
 	_selected_card = index if preview_enabled else -1
 	for card_index in _cards.size():
 		_cards[card_index].show_selected(card_index == _selected_card)

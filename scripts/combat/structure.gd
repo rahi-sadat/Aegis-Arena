@@ -1,6 +1,6 @@
 class_name ArenaStructure
 extends Node2D
-## Owns live tower HP and one-time destruction signals, and presents the tower.
+## Displays tower HP and destruction; GameManager synchronizes numeric combat here.
 
 signal damaged(structure: ArenaStructure, actual_damage: float)
 signal destroyed(structure: ArenaStructure)

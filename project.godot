@@ -1,11 +1,11 @@
-; Aegis Arena - Phase 1 match foundation. Open this file in Godot 4.x.
+; Aegis Arena - playable card battle and explainable search. Open in Godot 4.x.
 config_version=5
 
 [application]
 config/name="Aegis Arena"
 run/main_scene="res://scenes/ui/screens/TitleScreen.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
-config/description="A fantasy tactical card battle. Phase 1: structures, timer, and victory rules."
+config/description="A tactical card battle with Minimax, alpha-beta, MCTS, fuzzy assessment, and manual A*."
 
 [display]
 window/size/viewport_width=1920

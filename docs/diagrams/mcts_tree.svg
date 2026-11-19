@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="490" height="330" preserveAspectRatio="xMinYMin meet" viewBox="0 0 490 330" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="490" height="330"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-330)" style="clip-path: url(#clip)">
+		<g transform="">
+			<path d="M 245,278 L 83,235 Z" style="stroke: rgb(72%,76%,80%); stroke-linecap: butt; stroke-width: 1;"/>
+			<path d="M 245,278 L 245,235 Z" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 1.7;"/>
+			<path d="M 245,278 L 407,235 Z" style="stroke: rgb(72%,76%,80%); stroke-linecap: butt; stroke-width: 1;"/>
+			<rect x="127.0" y="279.0" width="236.0" height="38.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="208.1135" y="301" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,602) scale(1,-1)">ROOT: N 20 -&gt; 21</text>
+			<text x="214.204" y="288" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,576) scale(1,-1)">W 11.80 -&gt; 12.33</text>
+			<rect x="10.5" y="195.0" width="145.0" height="40.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="58.25" y="218" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,436) scale(1,-1)">Fighter Left</text>
+			<text x="37.64" y="205" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,410) scale(1,-1)">N 10, W 6.00: unchanged</text>
+			<rect x="172.5" y="195.0" width="145.0" height="40.0" style="stroke: rgb(14%,43%,30%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="217.001" y="218" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(14%,43%,30%); stroke:none;" transform="translate(0,436) scale(1,-1)">Fighter Right</text>
+			<text x="202.088" y="205" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,410) scale(1,-1)">N 6 -&gt; 7, W 4.20 -&gt; 4.73</text>
+			<rect x="334.5" y="195.0" width="145.0" height="40.0" style="stroke: rgb(12%,36%,60%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="397.5005" y="218" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(12%,36%,60%); stroke:none;" transform="translate(0,436) scale(1,-1)">Wait</text>
+			<text x="363.864" y="205" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,410) scale(1,-1)">N 4, W 1.60: unchanged</text>
+			<path d="M 245,195 L 245,166 Z" style="stroke: rgb(14%,43%,30%); stroke-linecap: butt; stroke-width: 1.7;"/>
+			<rect x="127.5" y="126.0" width="235.0" height="40.0" style="stroke: rgb(14%,43%,30%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="202.25" y="149" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(14%,43%,30%); stroke:none;" transform="translate(0,298) scale(1,-1)">SELECT: RED WAIT</text>
+			<text x="202.088" y="136" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,272) scale(1,-1)">N 1 -&gt; 2, W 0.80 -&gt; 1.33</text>
+			<path d="M 245,126 L 245,101 Z" style="stroke: rgb(14%,43%,30%); stroke-linecap: butt; stroke-width: 1.7;"/>
+			<rect x="127.5" y="61.0" width="235.0" height="40.0" style="stroke: rgb(14%,43%,30%); stroke-linecap: butt; stroke-width: 0.9; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="198.5015" y="84" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(14%,43%,30%); stroke:none;" transform="translate(0,168) scale(1,-1)">EXPAND: BLUE WAIT</text>
+			<text x="207.648" y="71" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,142) scale(1,-1)">N 0 -&gt; 1, W 0 -&gt; 0.53</text>
+			<text x="139.62975" y="43" style="font-family: Helvetica; font-size: 8.5px;fill: rgb(9%,17%,28%); stroke:none;" transform="translate(0,86) scale(1,-1)">Rollout to depth 6: score 12; reward 0.5 + 12/400 = 0.53</text>
+			<text x="111.828" y="23" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,46) scale(1,-1)">The same root-relative reward updates every ancestor on the selected path</text>
+			<text x="162.524" y="8" style="font-family: Helvetica; font-size: 8px;fill: rgb(36%,40%,46%); stroke:none;" transform="translate(0,16) scale(1,-1)">Illustrative arithmetic, not a recorded game run</text>
+		</g>
+	</g>
+</svg>

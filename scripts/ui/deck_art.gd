@@ -2,9 +2,9 @@ class_name DeckArt
 extends RefCounted
 ## Card artwork and the design values shown for the five-card deck.
 
-const NAMES := ["Fighter", "Ranger", "Tank", "Mage", "Arrow"]
-const COSTS := [3, 4, 5, 6, 3]
-const COOLDOWNS := [4, 5, 8, 9, 4]
+const NAMES := CardData.NAMES
+const COSTS := CardData.COSTS
+const COOLDOWNS := CardData.COOLDOWNS
 const ROLES := ["Fast front line", "Ranged damage", "High durability", "Spell burst", "Quick support"]
 ## Matches each card's gem colour: sapphire, emerald, amber, ruby, ice.
 const ACCENTS := [Color("#5aa8ff"), Color("#4fd18b"), Color("#f2b04a"), Color("#ff5f6b"), Color("#5fe3f0")]

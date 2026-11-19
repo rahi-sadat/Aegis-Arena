@@ -18,6 +18,8 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	# Inspect UI and match rules without an autonomous commander changing the fixture.
+	MatchConfig.autoplay_enabled = false
 	create_timer(30.0).timeout.connect(_watchdog)
 	if not _capture_path.is_empty():
 		if _capture_size.x <= 0 or _capture_size.y <= 0 or DisplayServer.get_name() == "headless":

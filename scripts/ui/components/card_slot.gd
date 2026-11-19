@@ -12,6 +12,7 @@ var _shade: ColorRect
 var _halo: Panel
 var _animation: Tween
 var _is_selected: bool = false
+var _cooldown: Label
 
 func build(index: int, artwork: Texture2D) -> void:
 	_index = index
@@ -33,6 +34,7 @@ func build(index: int, artwork: Texture2D) -> void:
 	_shade.color = Color(0.020, 0.027, 0.043, 0.38)
 	_shade.mouse_filter = MOUSE_FILTER_IGNORE
 	ArenaStyle.mount(self, _shade, _art_rect().grow(-2))
+	_cooldown = ArenaStyle.text(self, Rect2(5, 40, 100, 32), "", 23, Color.WHITE, true, HORIZONTAL_ALIGNMENT_CENTER)
 	pressed.connect(func() -> void: inspected.emit(_index))
 	mouse_entered.connect(_hover.bind(true))
 	mouse_exited.connect(_hover.bind(false))
@@ -53,8 +55,14 @@ func set_interaction(enabled: bool) -> void:
 	disabled = not enabled
 	_shade.visible = not enabled
 	var details := "%s  •  %d s cooldown" % [DeckArt.summary(_index), DeckArt.COOLDOWNS[_index]]
-	tooltip_text = DeckArt.NAMES[_index] + "\n" + details + ("" if enabled else "\nDeployment unlocks with units (Phase 2)")
+	tooltip_text = DeckArt.NAMES[_index] + "\n" + details
 	_hover(false)
+
+func set_live(ready: bool, remaining: float, explanation: String) -> void:
+	if disabled == ready:
+		set_interaction(ready)
+	_cooldown.text = "%.1fs" % remaining if remaining > BattleRules.EPSILON else ""
+	tooltip_text = DeckArt.summary(_index) + "\n" + explanation
 
 func show_selected(selected: bool) -> void:
 	_is_selected = selected

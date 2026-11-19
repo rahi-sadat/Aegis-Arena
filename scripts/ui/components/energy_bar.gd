@@ -21,12 +21,14 @@ func _ready() -> void:
 ## `value` is energy in 0..SEGMENTS; partial segments fill proportionally.
 func set_energy(value: float) -> void:
 	_value = clampf(value, 0.0, SEGMENTS)
+	_amount.text = "ENERGY   %.1f / 10" % _value
+	_regen.text = "+1 / s"
 	queue_redraw()
 
 func set_preview(enabled: bool) -> void:
+	set_energy(7.0 if enabled else 0.0)
 	_amount.text = "ENERGY   7 / 10" if enabled else "ENERGY LOCKED"
 	_regen.text = "+1 / s · sample" if enabled else "Phase 2"
-	set_energy(7.0 if enabled else 0.0)
 
 func _draw() -> void:
 	draw_rect(TRACK.grow(3), Color("#2a1a3a"))

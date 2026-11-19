@@ -27,7 +27,7 @@ func _ready() -> void:
 	var begin := ArenaStyle.button("ENTER BATTLE", true)
 	ArenaStyle.mount(self, begin, Rect2(1337, 950, 464, 68))
 	begin.pressed.connect(func() -> void: get_tree().change_scene_to_file(BATTLE))
-	ArenaStyle.text(self, Rect2(119, 950, 1180, 68), "Both sides use the same battlefield and the same five-card deck.\nThe current build runs the Phase 1 arena; search turns start once units are deployable.", 18, ArenaStyle.MUTED)
+	ArenaStyle.text(self, Rect2(119, 950, 1180, 68), "Both sides use the same five cards. Units fight while deployment turns alternate.\nHuman: cards 1–5, then A / D. F2 opens the actual decision tree.", 18, ArenaStyle.MUTED)
 	_refresh()
 	begin.grab_focus()
 
