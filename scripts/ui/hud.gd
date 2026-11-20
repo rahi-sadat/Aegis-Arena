@@ -99,6 +99,7 @@ func _build_deck() -> void:
 		var card := CARD.instantiate() as BattleCardSlot
 		card.name = DeckArt.NAMES[index]
 		ArenaStyle.mount(deck, card, Rect2(16 + index * 114, 29, 108, 124))
+		card.full_illustration = true
 		card.build(index, DeckArt.CARDS[index])
 		card.inspected.connect(_select_preview_card)
 		_cards.append(card)
@@ -220,7 +221,7 @@ func _on_decision(trace: Dictionary) -> void:
 		return
 	insight.set_trace(trace)
 	var card: int = trace.execution.action.card
-	_next_art.texture = (TroopArt.portrait(card) if card < 3 else DeckArt.CARDS[card]) if card >= 0 else DeckArt.BACK
+	_next_art.texture = DeckArt.CARDS[card] if card >= 0 else DeckArt.BACK
 	_next_art.modulate = Color.WHITE
 	if trace.team == 0 and trace.algorithm == "Human":
 		_selected_card = -1

@@ -9,33 +9,30 @@ const SETTINGS := preload("res://scenes/ui/components/SettingsPanel.tscn")
 @onready var _music: AudioStreamPlayer = $Music
 @onready var _sound: AudioStreamPlayer = $ButtonSound
 
+var _art: TextureRect
 var _settings: ArenaSettingsPanel
 var _help: Control
 var _help_back: Button
 var _main_action: Button
 
 func _ready() -> void:
-	MenuDesign.backdrop(self, background, 0.27)
-	MenuDesign.brand(self, "TACTICAL CARD BATTLE")
-	var options := ArenaStyle.button("SETTINGS")
-	ArenaStyle.mount(self, options, Rect2(1500, 35, 164, 44))
-	options.pressed.connect(func() -> void: _settings.open())
-	var exit := ArenaStyle.button("EXIT GAME")
-	ArenaStyle.mount(self, exit, Rect2(1680, 35, 168, 44))
-	exit.pressed.connect(func() -> void: get_tree().quit())
-	MenuDesign.eyebrow(self, Rect2(108, 236, 730, 28), "ENTER THE ARENA")
-	ArenaStyle.text(self, Rect2(100, 282, 810, 200), "Two lanes.\nOne core.", 92, ArenaStyle.TEXT, true)
-	ArenaStyle.text(self, Rect2(108, 516, 720, 86), "Build pressure. Defend your towers.\nChoose the card that changes the battle.", 26, Color("#b6c3cc"))
-	_main_action = ArenaStyle.button("PLAY", true)
-	ArenaStyle.mount(self, _main_action, Rect2(108, 660, 310, 68))
-	_main_action.pressed.connect(_open_battle)
-	var help := ArenaStyle.button("HOW TO PLAY")
-	ArenaStyle.mount(self, help, Rect2(438, 660, 250, 68))
-	help.pressed.connect(_open_help)
-	ArenaStyle.text(self, Rect2(108, 754, 730, 34), "PLAY AGAINST AI     /     WATCH AI VS AI", 14, ArenaStyle.MUTED)
-	_build_feature()
-	ArenaStyle.text(self, Rect2(108, 970, 1000, 35), "3-minute battles     •     5-card command deck     •     Pause to plan", 16, ArenaStyle.MUTED)
-	ArenaStyle.text(self, Rect2(1430, 970, 410, 35), "PLAY.  OBSERVE.  UNDERSTAND.", 12, ArenaStyle.GOLD, true, HORIZONTAL_ALIGNMENT_RIGHT)
+	_art = ArenaStyle.art(self, Rect2(-15, -12, 1950, 1104), background)
+	var embers := EmberField.new()
+	add_child(embers)
+	embers.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	var cover := ArenaStyle.veil(self, Color(0.015, 0.025, 0.05, 0.19))
+	cover.mouse_filter = MOUSE_FILTER_IGNORE
+	var crest := ArenaStyle.panel(self, Rect2(102, 112, 78, 78))
+	ArenaStyle.art(crest, Rect2(5, 5, 68, 68), DeckArt.BACK)
+	ArenaStyle.text(self, Rect2(197, 130, 550, 33), "TACTICAL CARD BATTLE", 18, ArenaStyle.GOLD, true)
+	var logo := ArenaStyle.art(self, Rect2(70, 205, 620, 207), DeckArt.LOGO)
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+	logo.tooltip_text = "Aegis Arena"
+	_main_action = _menu_button("PLAY", 441, _open_battle, true)
+	_menu_button("GAME MODES", 519, _open_battle)
+	_menu_button("HOW TO PLAY", 597, _open_help)
+	_menu_button("SETTINGS", 675, func() -> void: _settings.open())
+	_menu_button("EXIT GAME", 753, func() -> void: get_tree().quit())
 	_main_action.grab_focus()
 	_build_help()
 	_settings = SETTINGS.instantiate() as ArenaSettingsPanel
@@ -48,25 +45,22 @@ func _ready() -> void:
 		_music.play()
 	if button_sound != null:
 		_sound.stream = button_sound
-	ArenaStyle.cycle_focus([_main_action, help, options, exit])
-	ArenaStyle.enter(self)
 
-func _build_feature() -> void:
-	var feature := ArenaStyle.panel(self, Rect2(1030, 225, 740, 622), ArenaStyle.EDGE_BLUE)
-	MenuDesign.eyebrow(feature, Rect2(30, 20, 680, 30), "YOUR NEXT BATTLE")
-	ArenaStyle.text(feature, Rect2(30, 62, 680, 58), "A small deck. A real decision.", 33, ArenaStyle.TEXT, true)
-	ArenaStyle.text(feature, Rect2(30, 127, 680, 58), "Three distinct troops. Two lane spells.\nEvery card has a moment to play.", 20, ArenaStyle.MUTED)
-	for index in 3:
-		var x: float = 33 + index * 226
-		var cell := ArenaStyle.panel(feature, Rect2(x, 223, 210, 256), Color("#546675"))
-		var picture := ArenaStyle.art(cell, Rect2(12, 8, 186, 199), TroopArt.portrait(index))
-		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		ArenaStyle.text(cell, Rect2(10, 213, 190, 28), CardData.NAMES[index].to_upper(), 14, ArenaStyle.TEXT, true, HORIZONTAL_ALIGNMENT_CENTER)
-	ArenaStyle.text(feature, Rect2(33, 514, 670, 65), "See how the AI thinks.\nLive search trees and fuzzy reasoning inside every match.", 19, ArenaStyle.MUTED)
+func _process(_delta: float) -> void:
+	var period := Time.get_ticks_msec() * 0.00023
+	_art.position = Vector2(-15, -12) if UISettings.reduce_motion else Vector2(-15 + sin(period) * 6.0, -12 + cos(period) * 4.0)
+
+func _menu_button(caption: String, y: int, callback: Callable, primary: bool = false) -> Button:
+	var action := ArenaStyle.button(caption, primary)
+	ArenaStyle.mount(self, action, Rect2(104, y, 404, 61))
+	action.pressed.connect(func() -> void:
+		if button_sound != null:
+			_sound.play()
+		callback.call()
+	)
+	return action
 
 func _open_battle() -> void:
-	if button_sound != null:
-		_sound.play()
 	ArenaTransition.go(self, PRE_BATTLE)
 
 func _build_help() -> void:

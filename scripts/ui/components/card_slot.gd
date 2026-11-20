@@ -4,6 +4,7 @@ extends TextureButton
 
 signal inspected(index: int)
 @export var illustration: Texture2D
+@export var full_illustration: bool = false
 
 var _index: int
 var _accent: Color
@@ -19,6 +20,10 @@ var _hovered: bool = false
 func build(index: int, artwork: Texture2D) -> void:
 	_index = index
 	_accent = [Color("#8caabd"), Color("#93a991"), Color("#bba57f"), Color("#b9806f"), Color("#8facc0")][index]
+	if full_illustration:
+		_build_illustrated_card(artwork)
+		_bind_events()
+		return
 	var gradient := Gradient.new()
 	gradient.colors = PackedColorArray([Color("#25313d"), Color("#111922")])
 	var background := GradientTexture2D.new()
@@ -55,11 +60,42 @@ func build(index: int, artwork: Texture2D) -> void:
 	ArenaStyle.text(self, Rect2(size.x - 25, 8, 19, 18), str(index + 1), 11, ArenaStyle.MUTED, false, HORIZONTAL_ALIGNMENT_CENTER)
 	ArenaStyle.text(self, Rect2(3, size.y - (47 if large else 39), size.x - 6, 28 if large else 21), CardData.NAMES[index], 19 if large else 14, ArenaStyle.TEXT, true, HORIZONTAL_ALIGNMENT_CENTER)
 	ArenaStyle.text(self, Rect2(3, size.y - 17, size.x - 6, 12), ["MELEE", "ARCHER", "GOLEM", "FIRE SPELL", "ARROW SPELL"][index], 11 if large else 9, _accent, false, HORIZONTAL_ALIGNMENT_CENTER)
+	_build_cooldown()
+	_bind_events()
+
+func _build_illustrated_card(artwork: Texture2D) -> void:
+	# Original da78d94 card face includes its painted frame, cost and name plate.
+	_accent = DeckArt.ACCENTS[_index]
+	texture_normal = artwork if artwork != null else illustration
+	texture_filter = TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	ignore_texture_size = true
+	stretch_mode = STRETCH_KEEP_ASPECT_CENTERED
+	mouse_default_cursor_shape = CURSOR_POINTING_HAND
+	var width: float = minf(size.x, size.y * DeckArt.CARD_ASPECT)
+	var height: float = width / DeckArt.CARD_ASPECT
+	var art_rect := Rect2((size.x - width) * 0.5, (size.y - height) * 0.5, width, height)
+	_halo = Panel.new()
+	_halo.mouse_filter = MOUSE_FILTER_IGNORE
+	_halo.show_behind_parent = true
+	var glow := ArenaStyle.box(Color.TRANSPARENT, _accent.lightened(0.25), 3, 10)
+	glow.shadow_color = Color(_accent, 0.7)
+	glow.shadow_size = 12
+	_halo.add_theme_stylebox_override("panel", glow)
+	ArenaStyle.mount(self, _halo, art_rect.grow(3))
+	_shade = ColorRect.new()
+	_shade.color = Color(0.020, 0.027, 0.043, 0.38)
+	_shade.mouse_filter = MOUSE_FILTER_IGNORE
+	ArenaStyle.mount(self, _shade, art_rect.grow(-2))
+	_build_cooldown()
+
+func _build_cooldown() -> void:
 	_radial = Control.new()
 	_radial.mouse_filter = MOUSE_FILTER_IGNORE
 	ArenaStyle.mount(self, _radial, Rect2(Vector2.ZERO, size))
 	_radial.draw.connect(_draw_cooldown)
 	_cooldown = ArenaStyle.text(self, Rect2(0, size.y * 0.36 - 12, size.x, 25), "", 16, Color.WHITE, true, HORIZONTAL_ALIGNMENT_CENTER)
+
+func _bind_events() -> void:
 	pressed.connect(func() -> void: inspected.emit(_index))
 	mouse_entered.connect(_hover.bind(true))
 	mouse_exited.connect(_hover.bind(false))
