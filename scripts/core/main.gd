@@ -31,10 +31,15 @@ func _ready() -> void:
 	hud.routes_requested.connect(_toggle_routes)
 	search_tree = SearchTreeView.new()
 	search_tree.name = "SearchTree"
-	ArenaStyle.mount(hud.interface, search_tree, Rect2(410, 170, 1100, 660))
-	search_tree.controller = ai_manager
+	ArenaStyle.mount(hud.interface, search_tree, Rect2(170, 106, 1580, 868))
+	search_tree.bind_controller(ai_manager)
 	search_tree.export_requested.connect(_export_traces)
 	hud.trace_requested.connect(search_tree.toggle)
+	hud.insight.analysis_requested.connect(func(tab: int) -> void:
+		search_tree.show()
+		search_tree.show_team(hud.insight._team)
+		search_tree._set_tab(tab)
+	)
 	for overlay in [hud.pause_menu, hud.result_panel, hud.settings]:
 		hud.interface.move_child(overlay, -1)
 	_restart_match()
@@ -98,7 +103,7 @@ func _debug_damage(structure_id: StringName) -> void:
 	game_manager.damage_structure(structure_id, game_manager.balance.debug_damage_amount)
 
 func _return_to_title() -> void:
-	get_tree().change_scene_to_file(TITLE)
+	ArenaTransition.go(self, TITLE)
 
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
@@ -108,6 +113,14 @@ func _input(event: InputEvent) -> void:
 			hud.close_settings()
 			get_viewport().set_input_as_handled()
 		return
+	if search_tree.visible:
+		if event.keycode == KEY_ESCAPE:
+			search_tree.hide()
+			get_viewport().set_input_as_handled()
+			return
+		if event.keycode in [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_A, KEY_D, KEY_W]:
+			get_viewport().set_input_as_handled()
+			return
 	match event.keycode:
 		KEY_SPACE, KEY_ESCAPE:
 			_toggle_pause()

@@ -10,7 +10,7 @@ document describes the implemented version.
 
 1. `scripts/combat/card_data.gd`: the five cards' shared numeric values.
 2. `scripts/state/game_state.gd`: one small data class and deep copying.
-3. `scripts/core/battle_rules.gd`: legal actions, one action, and one combat tick.
+3. `scripts/core/battle_rules.gd`: legal actions, one action, and one ok
 4. `scripts/ai/search_helpers.gd`: `player`, `actions`, `result`, `terminal`, `utility`.
 5. `scripts/ai/fuzzy_logic.gd` and `evaluation.gd`: membership, rules, weights, score.
 6. `scripts/ai/minimax.gd`: explicit MAX/MIN recursion following the supplied sample.

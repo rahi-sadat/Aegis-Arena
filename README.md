@@ -29,7 +29,7 @@ GDScript functions in `scripts/ai/`; there are no Python services or packages.
 | W / Wait | Queue Wait; the last queued choice replaces the earlier one |
 | Space or Esc / Pause | Pause or resume the match |
 | R / Restart | Reset the battle |
-| F2 / Search Tree | Inspect recent genuine decisions, branches, and leaf calculations |
+| F2 / Decision Lab | Follow live trees, hold a snapshot, or inspect fuzzy calculations |
 | F7 / Export | Save decision JSON, the selected historical decision, and A* traces |
 | G / A* Routes | Show routes, blocked/explored cells, and bridge g/h/f values |
 | F3 / F3 Debug | Toggle the six structure damage buttons |
@@ -117,10 +117,13 @@ the [original design report](docs/algorithm_implementation_report.md) preserve
 the approved plan and synthetic teaching examples.
 
 F7 exports under `output/evidence/` while running the project, or `user://evidence`
-in an exported game. The decision viewer keeps twelve decisions per team and
-defaults to a recent branching decision. Choose a historical decision, then a
-branch; click a leaf to see its exact contributions. Its dropdown shows the
-recorded clock so the snapshot is distinguishable from the current live state.
+in an exported game. The decision lab follows actual in-progress and completed
+searches automatically. Choose a root branch or the full tree; click a node to
+hold it and inspect its arithmetic. Resume Live catches up. History retains
+twelve completed decisions per team. The fuzzy tab shows membership curves,
+fired rules, calculations and weights from the selected decision, or a separately
+labelled live battlefield assessment. Read the
+[frontend and teacher demonstration guide](docs/frontend_and_decision_lab.md).
 
 Replay a completed export with its saved seed and snapshot:
 

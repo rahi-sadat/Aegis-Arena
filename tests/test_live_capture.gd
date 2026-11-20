@@ -28,7 +28,23 @@ func _run() -> void:
 	ai.export_directory = "res://output/evidence/live_demo"
 	MatchConfig.autoplay_enabled = true
 	manager.start_match(manager.structures)
-	await create_timer(9.0).timeout
+	await create_timer(3.0).timeout
+	main.search_tree.show()
+	main.search_tree.show_team(0)
+	var blue_tick: int = main.search_tree.trace.root_snapshot.tick_index
+	await create_timer(2.0).timeout
+	_check(main.search_tree.trace.root_snapshot.tick_index > blue_tick, "Blue graph advances during real-time rendered gameplay")
+	main.search_tree.show_team(1)
+	var red_tick: int = main.search_tree.trace.root_snapshot.tick_index
+	await create_timer(2.0).timeout
+	_check(main.search_tree.trace.root_snapshot.tick_index > red_tick, "MCTS graph advances during real-time rendered gameplay")
+	main.search_tree._set_tab(1)
+	main.search_tree._live_field = true
+	await create_timer(2.0).timeout
+	_check(not main.search_tree._fuzzy.assessment.is_empty(), "Live fuzzy calculations render while both agents and combat continue")
+	main.search_tree._live_field = false
+	main.search_tree._set_tab(0)
+	main.search_tree.hide()
 	manager.set_process(false)
 	_check(ai.decisions >= 9 and manager.remaining_match_time < 174, "Rendered real-time AI match deploys through multiple slots")
 	_check(manager.battle_state.next_unit_id > 5, "The rendered match contains real deployments")

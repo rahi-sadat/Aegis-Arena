@@ -58,6 +58,8 @@ static func ground_position(unit_lane: int, progress: float, id: int) -> Vector2
 func update_model(unit: Dictionary) -> void:
 	if unit.hp < hp:
 		_flash = 0.14
+	if unit.hp != hp:
+		_overlay.queue_redraw()
 	hp = unit.hp
 	var point: Vector2 = ground_position(lane, unit.progress, unit_id)
 	var movement: Vector2 = point - _target
@@ -87,6 +89,7 @@ func die() -> void:
 	if is_dying:
 		return
 	is_dying = true
+	_overlay.queue_redraw()
 	_moving = false
 	_death_left = 0.26
 
@@ -107,10 +110,10 @@ func animate(delta: float, paused: bool) -> void:
 	else:
 		modulate.a = _spawn
 	var light: float = 1.0 + 1.7 * (_flash / 0.14)
-	_sprite.modulate = Color(light, light, light, 1)
+	var tint := Color(light, light, light, 1)
+	if _sprite.modulate != tint:
+		_sprite.modulate = tint
 	_update_frame()
-	queue_redraw()
-	_overlay.queue_redraw()
 
 func _update_frame() -> void:
 	var row: int = 0 if _north else 1
@@ -120,7 +123,11 @@ func _update_frame() -> void:
 		column = clampi(int((1.0 - _attack_left / _attack_length) * 4), 0, 3)
 	if UISettings.reduce_motion:
 		column = 2 if _attack_left > 0 else 0
-	_frame = row * 4 + column
+	var next_frame: int = row * 4 + column
+	_sprite.flip_h = _flip
+	if next_frame == _frame and not _sprite.region_rect.size.is_zero_approx():
+		return
+	_frame = next_frame
 	var rect: Rect2 = TroopArt.frame_rect(card, row, column)
 	var scale_factor: float = TroopArt.WORLD_HEIGHT[card] / TroopArt.BODY_PIXELS[card]
 	_sprite.region_rect = rect

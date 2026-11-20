@@ -94,7 +94,7 @@ func set_live(ready: bool, remaining: float, explanation: String) -> void:
 	_radial.queue_redraw()
 
 func _process(delta: float) -> void:
-	if _radial != null and _remaining > 0:
+	if _radial != null and _remaining > 0 and not is_equal_approx(_display_remaining, _remaining):
 		_display_remaining = move_toward(_display_remaining, _remaining, delta * 2)
 		_radial.queue_redraw()
 

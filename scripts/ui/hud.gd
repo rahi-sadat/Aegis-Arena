@@ -144,7 +144,7 @@ func _build_deployment_controls() -> void:
 			button.pressed.connect(request_wait)
 		_lane_buttons.append(button)
 	_human_status = ArenaStyle.text(panel, Rect2(14, 91, 306, 49), "", 15, ArenaStyle.MUTED)
-	var trace_button := ArenaStyle.button("SEARCH TREE [F2]")
+	var trace_button := ArenaStyle.button("DECISION LAB [F2]")
 	trace_button.add_theme_font_size_override("font_size", 13)
 	_plan_button = ArenaStyle.button("PAUSE & PLAN [TAB]")
 	_plan_button.add_theme_font_size_override("font_size", 13)

@@ -78,7 +78,7 @@ layout_mode = 0
 offset_left = 1584.0
 offset_top = 220.0
 offset_right = 1888.0
-offset_bottom = 520.0
+offset_bottom = 556.0
 
 [node name="CommandStrip" type="Panel" parent="Interface"]
 layout_mode = 0

@@ -182,6 +182,9 @@ static func enter(control: Control) -> void:
 	control.set_meta(&"enter_tween", tween)
 
 static func fill_bar(meter: Range, value: float, immediate: bool = false) -> void:
+	if is_equal_approx(float(meter.get_meta("fill_target", -1.0)), value) and (not immediate or is_equal_approx(meter.value, value)):
+		return
+	meter.set_meta("fill_target", value)
 	if meter.has_meta(&"fill_tween"):
 		var active: Tween = meter.get_meta(&"fill_tween")
 		if active.is_valid():

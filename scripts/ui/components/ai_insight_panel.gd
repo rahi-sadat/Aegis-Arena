@@ -1,6 +1,8 @@
 class_name AIInsightPanel
 extends Panel
 
+signal analysis_requested(tab: int)
+
 const METRICS := ["Threat", "Opportunity", "Energy"]
 const SAMPLE := [0.62, 0.44, 0.71]
 const TONES := [Color("#f77e7b"), Color("#8bd9a8"), Color("#b88aff")]
@@ -29,7 +31,7 @@ func _ready() -> void:
 	_toggle.pressed.connect(_collapse)
 	_body = Control.new()
 	_body.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ArenaStyle.mount(self, _body, Rect2(14, 42, 276, 246))
+	ArenaStyle.mount(self, _body, Rect2(14, 42, 276, 282))
 	_status = ArenaStyle.text(_body, Rect2(0, 0, 276, 24), "", 12, GameConstants.BLUE_COLOR, true)
 	for index in METRICS.size():
 		var y := 33 + index * 25
@@ -43,6 +45,11 @@ func _ready() -> void:
 	_action = ArenaStyle.text(_body, Rect2(0, 146, 276, 25), "", 13, ArenaStyle.TEXT)
 	_cost = ArenaStyle.text(_body, Rect2(46, 174, 230, 20), "", 12, ArenaStyle.VIOLET)
 	_details = ArenaStyle.text(_body, Rect2(0, 207, 276, 43), "", 11, ArenaStyle.MUTED)
+	for tab in 2:
+		var button := ArenaStyle.button(["LIVE TREE", "FUZZY MATH"][tab])
+		button.add_theme_font_size_override("font_size", 12)
+		ArenaStyle.mount(_body, button, Rect2(tab * 142, 252, 134, 30))
+		button.pressed.connect(func() -> void: analysis_requested.emit(tab))
 	set_preview(false)
 
 func set_preview(enabled: bool, tank_art: Texture2D = null) -> void:
@@ -98,6 +105,6 @@ func _collapse() -> void:
 	_body.visible = _expanded
 	if _expanded:
 		ArenaStyle.enter(_body)
-	size.y = 300.0 if _expanded else 44.0
+	size.y = 336.0 if _expanded else 44.0
 	_toggle.text = "−" if _expanded else "+"
 	_toggle.tooltip_text = "Collapse AI insight" if _expanded else "Expand AI insight"

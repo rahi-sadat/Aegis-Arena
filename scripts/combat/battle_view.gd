@@ -3,9 +3,15 @@ extends Node2D
 ## Animated sprites and combat feedback only. BattleRules remains the sole simulator.
 
 var manager: GameManager
-var show_routes: bool = false
+var show_routes: bool = false:
+	set(value):
+		show_routes = value
+		queue_redraw()
 var selected_lane: int = -1
-var show_deployment: bool = false
+var show_deployment: bool = false:
+	set(value):
+		show_deployment = value
+		queue_redraw()
 var visuals: Dictionary = {}
 var effects: Array = []
 var _model_tick: int = -1
@@ -57,8 +63,9 @@ func _capture_model() -> void:
 	_model_tick = state.tick_index
 
 func _process(delta: float) -> void:
-	if manager == null:
+	if manager == null or manager.is_paused:
 		return
+	var had_effects: bool = not effects.is_empty()
 	if not manager.is_paused:
 		_clock += delta
 		for index in range(effects.size() - 1, -1, -1):
@@ -77,8 +84,8 @@ func _process(delta: float) -> void:
 	for id: int in remove:
 		visuals[id].queue_free()
 		visuals.erase(id)
-	queue_redraw()
-	_fx_layer.queue_redraw()
+	if had_effects or not effects.is_empty():
+		_fx_layer.queue_redraw()
 
 func _find_visual(team: int, lane: int, progress: float, card: int = -1) -> TroopVisual:
 	var found: TroopVisual = null

@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Aegis Arena"
-run/main_scene="res://scenes/ui/screens/TitleScreen.tscn"
+run/main_scene="res://scenes/ui/screens/LoadingScreen.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
 config/description="A tactical card battle with Minimax, alpha-beta, MCTS, fuzzy assessment, and manual A*."
 

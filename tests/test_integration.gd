@@ -55,7 +55,8 @@ func _run() -> void:
 	_check(manager.battle_state.units.is_empty() and manager.battle_state.energy[0] == 10, "Human opening defaults to Wait with full energy")
 	_check(hud.blue.logic_label.text.contains("Human player") and hud.insight._team == 1, "Restart refreshes the human badge and follows the actual AI commander")
 	main.search_tree.show_team(1)
-	_check(main.search_tree.trace.is_empty() and main.search_tree._history.item_count == 0, "A restarted match cannot display the previous match's decision history")
+	var fresh_view: Dictionary = main.search_tree.trace
+	_check(main.search_tree._history.item_count == 0 and (fresh_view.is_empty() or fresh_view.root_snapshot.tick_index == BattleRules.TICKS_PER_DECISION), "Restart clears old history; live view may show only the new match's first pending decision")
 	var fighter: BattleCardSlot = hud.deck.get_node("Fighter")
 	_check(not fighter.disabled, "An affordable human card is enabled")
 	fighter.pressed.emit()

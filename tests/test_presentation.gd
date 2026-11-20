@@ -139,9 +139,9 @@ func _run() -> void:
 	_press(hud.pause_menu, "RETURN TO TITLE")
 	await scene_changed
 	_check(current_scene.name == &"TitleScreen", "Pause menu returns to the title")
-	_press(current_scene, "GAME MODES")
+	_press(current_scene, "PLAY")
 	await scene_changed
-	_check(current_scene.name == &"PreBattleScreen", "Game Modes opens setup")
+	_check(current_scene.name == &"PreBattleScreen", "Play reopens setup")
 	_press(current_scene, "BACK TO TITLE")
 	await scene_changed
 	_check(current_scene.name == &"TitleScreen", "Setup returns to title")
