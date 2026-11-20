@@ -41,7 +41,8 @@ func _ready() -> void:
 		_bars.append(bar)
 		_values.append(ArenaStyle.text(_body, Rect2(230, y, 46, 23), "", 13, ArenaStyle.TEXT, false, HORIZONTAL_ALIGNMENT_RIGHT))
 	_intent = ArenaStyle.text(_body, Rect2(0, 116, 276, 25), "", 15, ArenaStyle.TEXT, true)
-	_unit_portrait = ArenaStyle.art(_body, Rect2(0, 151, 36, 44), null)
+	_unit_portrait = ArenaStyle.art(_body, Rect2(0, 151, 36, 48), null)
+	_unit_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_action = ArenaStyle.text(_body, Rect2(0, 146, 276, 25), "", 13, ArenaStyle.TEXT)
 	_cost = ArenaStyle.text(_body, Rect2(46, 174, 230, 20), "", 12, ArenaStyle.VIOLET)
 	_details = ArenaStyle.text(_body, Rect2(0, 207, 276, 43), "", 11, ArenaStyle.MUTED)
@@ -96,7 +97,7 @@ func set_trace(trace: Dictionary) -> void:
 	_action.position.x = 46.0 if move.card >= 0 else 0.0
 	_action.size.x = 230.0 if move.card >= 0 else 276.0
 	_unit_portrait.visible = move.card >= 0
-	_unit_portrait.texture = (TroopArt.portrait(move.card) if move.card < 3 else DeckArt.CARDS[move.card]) if move.card >= 0 else null
+	_unit_portrait.texture = DeckArt.CARDS[move.card] if move.card >= 0 else null
 	_cost.text = "%d energy" % CardData.COSTS[move.card] if move.card >= 0 else "No energy spent"
 	_details.text = "%d states  /  %.1f ms CPU\n%s  ·  F2 details" % [trace.stats.visited, trace.stats.cpu_ms, trace.execution.status]
 
